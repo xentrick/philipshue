@@ -156,7 +156,7 @@ impl Bridge {
             })
     }
     /// Sends a `LightCommand` to set the state of a light
-    pub fn set_light_state(&self, light: usize, command: LightCommand) -> Result<Value, HueError> {
+    pub fn set_light_state(&self, light: usize, command: LightCommand) -> Result<Vec<HueResponse<Value>>, HueError> {
         let url = format!("http://{}/api/{}/lights/{}/state",
                           self.ip,
                           self.username,

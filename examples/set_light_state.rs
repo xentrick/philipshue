@@ -65,8 +65,17 @@ fn main() {
         }
         _ => panic!("can not understand command {:?}", command),
     };
-    for l in lights.iter() {
-        println!("{:?}", bridge.set_light_state(*l, parsed));
+    for l in lights.into_iter() {
+        match bridge.set_light_state(*l, parsed){
+            Ok(resps) => for resp in resps.into_iter(){
+                if let Some(success) = resp.success{
+                    println!("Success: {:?}", success)
+                }else if let Some(err) = resp.error{
+                    println!("Error: {:?}", err);
+                }
+            },
+            Err(e) => println!("Error happened trying to send request:\n\t{:?}", e)
+        }
         std::thread::sleep(Duration::from_millis(50))
     }
 }
