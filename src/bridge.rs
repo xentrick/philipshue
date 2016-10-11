@@ -10,11 +10,11 @@ use ::hue::*;
 
 /// Attempt to discover bridges using `https://www.meethue.com/api/nupnp`
 pub fn discover() -> Result<Vec<Discovery>, HueError> {
-    let client = Client::new();
-
-    let mut res = try!(client.get("https://www.meethue.com/api/nupnp").send());
-
-    from_reader(&mut res).map_err(From::from)
+    Client::new()
+        .get("https://www.meethue.com/api/nupnp")
+        .send()
+        .map_err(HueError::from)
+        .and_then(|ref mut r| from_reader(r).map_err(From::from))
 }
 
 /// A builder object for a `Bridge` object
@@ -136,23 +136,24 @@ pub struct Bridge {
 impl Bridge {
     /// Gets all lights from the bridge
     pub fn get_all_lights(&self) -> Result<Vec<IdentifiedLight>, HueError> {
-        let url = format!("http://{}/api/{}/lights",
-                          self.ip,
-                          self.username);
-
-        let mut resp = try!(self.client.get(&url).send());
-        let json: Map<usize, Light> = try!(from_reader(&mut resp));
-
-        let mut lights: Vec<IdentifiedLight> = try!(json.into_iter()
-            .map(|(id, light)| -> Result<IdentifiedLight, HueError> {
-                Ok(IdentifiedLight {
-                    id: id,
-                    light: light,
-                })
+        self.client
+            .get(&format!("http://{}/api/{}/lights", self.ip, self.username))
+            .send()
+            .map_err(HueError::from)
+            .and_then(|ref mut resp| from_reader::<_, Map<usize, Light>>(resp).map_err(From::from))
+            .map(|json: Map<usize, Light>|{
+                let mut lights: Vec<_> = json
+                    .into_iter()
+                    .map(|(id, light)| {
+                        IdentifiedLight {
+                            id: id,
+                            light: light,
+                        }
+                    })
+                    .collect();
+                lights.sort_by_key(|x| x.id);
+                lights
             })
-            .collect());
-        lights.sort_by_key(|x| x.id);
-        Ok(lights)
     }
     /// Sends a `LightCommand` to set the state of a light
     pub fn set_light_state(&self, light: usize, command: LightCommand) -> Result<Value, HueError> {
@@ -167,10 +168,11 @@ impl Bridge {
         let cleaned2 = re2.replace_all(&cleaned1, "}");
         let body = cleaned2.as_bytes();
 
-        let mut resp = try!(self.client.put(&url)
+        self.client
+            .put(&url)
             .body(Body::BufBody(body, body.len()))
-            .send());
-
-        from_reader(&mut resp).map_err(From::from)
+            .send()
+            .map_err(HueError::from)
+            .and_then(|ref mut resp| from_reader(resp).map_err(From::from))
     }
 }
