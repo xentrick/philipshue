@@ -56,12 +56,9 @@ fn main() {
             let caps = re_rrggbb.captures(&command).unwrap();
 
             let rgb: Vec<u8> = [caps.at(1), caps.at(2), caps.at(3)].iter().map(|s| u8::from_str_radix(s.unwrap(), 16).unwrap()).collect();
-            let hsv = rgb_to_hsv(rgb[0], rgb[1], rgb[2]);
-            println!("{:?}", hsv);
-            light_command.hue = Some((hsv.0 * 65535f64) as u16);
-            light_command.sat = Some((hsv.1 * 255f64) as u8);
-            light_command.bri = Some((hsv.2 * 255f64) as u8);
-            light_command
+            let (hue, sat, bri) = rgb_to_hsv(rgb[0], rgb[1], rgb[2]);
+            println!("{:?}", (hue, sat, bri));
+            light_command.with_hue(hue).with_sat(sat).with_bri(bri)
         }
         _ => panic!("can not understand command {:?}", command),
     };
@@ -81,7 +78,7 @@ fn main() {
 }
 
 
-fn rgb_to_hsv(r: u8, g: u8, b: u8) -> (f64, f64, f64) {
+fn rgb_to_hsv(r: u8, g: u8, b: u8) -> (u16, u8, u8) {
     let r = r as f64 / 255f64;
     let g = g as f64 / 255f64;
     let b = b as f64 / 255f64;
@@ -89,7 +86,7 @@ fn rgb_to_hsv(r: u8, g: u8, b: u8) -> (f64, f64, f64) {
     let min = r.min(g.min(b));
 
     if max == min {
-        (0f64, 0f64, max)
+        (0, 0, (max * 255.) as u8)
     } else {
         let d = max - min;
         let s = d / max;
@@ -100,6 +97,6 @@ fn rgb_to_hsv(r: u8, g: u8, b: u8) -> (f64, f64, f64) {
         } else {
             (r - g) / d + 4f64
         };
-        (h / 6f64, s, max)
+        ((65535. * h / 6.) as u16, (s * 255.) as u8, (max * 255.) as u8)
     }
 }
