@@ -15,8 +15,7 @@ fn main() {
         return;
     }
     let bridge = philipshue::bridge::discover().unwrap().pop().unwrap().build_bridge().from_username(args[1].clone());
-    let ref lights: Vec<usize> = args[2].split(",").map(|s| s.parse::<usize>().unwrap()).collect();
-    println!("lights: {:?}", lights);
+    let ref input_lights: Vec<usize> = args[2].split(",").map(|s| s.parse::<usize>().unwrap()).collect();
     let ref command = args[3];
     let re_triplet = Regex::new("([0-9]{0,3}):([0-9]{0,5}):([0-9]{0,3})").unwrap();
     let re_mired = Regex::new("([0-9]{0,4})MK:([0-9]{0,5})").unwrap();
@@ -62,18 +61,22 @@ fn main() {
         }
         _ => panic!("can not understand command {:?}", command),
     };
-    for l in lights.into_iter() {
-        match bridge.set_light_state(*l, parsed){
-            Ok(resps) => for resp in resps.into_iter(){
-                if let Some(success) = resp.success{
-                    println!("Success: {:?}", success)
-                }else if let Some(err) = resp.error{
-                    println!("Error: {:?}", err);
-                }
-            },
-            Err(e) => println!("Error happened trying to send request:\n\t{:?}", e)
+    let mut bridge_lights = bridge.get_lights().unwrap();
+
+    for light in bridge_lights.iter_mut() {
+        if input_lights.contains(&light.id){
+            match light.set_state(&bridge, parsed){
+                Ok(resps) => for resp in resps.into_iter(){
+                    if let Some(success) = resp.success{
+                        println!("Success: {:?}", success)
+                    }else if let Some(err) = resp.error{
+                        println!("Error: {:?}", err);
+                    }
+                },
+                Err(e) => println!("Error happened trying to send request:\n\t{:?}", e)
+            }
+            std::thread::sleep(Duration::from_millis(50))
         }
-        std::thread::sleep(Duration::from_millis(50))
     }
 }
 

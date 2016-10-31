@@ -32,15 +32,6 @@ pub struct Light {
     pub state: LightState
 }
 
-#[derive(Debug, Clone)]
-/// A newly identified light
-pub struct IdentifiedLight {
-    /// The ID number of this light
-    pub id: usize,
-    /// The light object
-    pub light: Light,
-}
-
 #[derive(Debug, Default, Clone, Copy, Serialize)]
 /// Struct for building a command that will be sent to the Hue bridge telling it what to do with a light
 ///

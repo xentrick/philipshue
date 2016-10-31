@@ -8,8 +8,8 @@ fn main() {
         return;
     }
     let bridge = philipshue::bridge::discover().unwrap().pop().unwrap().build_bridge().from_username(args[1].clone());
-    
-    match bridge.get_all_lights() {
+
+    match bridge.get_lights() {
         Ok(lights) => {
             println!("id name                 on    bri   hue sat temp");
             for ref l in lights.iter() {
