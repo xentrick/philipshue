@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Copy, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 /// The state of the light with similar structure to `LightCommand`
 pub struct LightState {
     /// Whether the light is on
@@ -11,8 +11,20 @@ pub struct LightState {
     pub hue: u16,
     /// Staturation of the light. 254 is the most saturated (colored) and 0 is the least (white).
     pub sat: u8,
+    /// The x and y coordinates of a colour in [CIE space](http://www.developers.meethue.com/documentation/core-concepts#color_gets_more_complicated)
+    pub xy: [f32; 2],
     /// The [mired](http://en.wikipedia.org/wiki/Mired) colour temperature of the light.
-    pub ct: Option<u16>,
+    pub ct: u16,
+    /// The [alert effect](http://www.developers.meethue.com/documentation/core-concepts#some_extra_fun_stuff)
+    pub alert: String,
+    /// The dynamic effect of the light. It can be either "none" or "colorloop"
+    ///
+    /// If "colorloop", the light will cycle hues
+    pub effect: String,
+    /// The current colour mode either: "hs" for hue and saturation, "xy" for x and y coordinates in colour space, or "ct" for colour temperature
+    pub colormode: Option<String>,
+    /// Whether the light can be reached by the bridge
+    pub reachable: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]
