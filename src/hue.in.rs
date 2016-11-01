@@ -1,5 +1,3 @@
-use ::bridge::BridgeBuilder;
-
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Copy, Clone, Deserialize)]
@@ -57,11 +55,6 @@ pub struct Discovery{
 }
 
 impl Discovery {
-    /// Returns a `BridgeBuilder` with the ip of the bridge discovered
-    pub fn build_bridge(self) -> BridgeBuilder{
-        let Discovery{internalipaddress,..} = self;
-        BridgeBuilder::from_ip(internalipaddress)
-    }
     /// The ip of this discovered bridge
     pub fn ip(&self) -> &str{
         &self.internalipaddress
@@ -69,6 +62,11 @@ impl Discovery {
     /// The id of this discovered bridge
     pub fn id(&self) -> &str{
         &self.id
+    }
+    /// Consumes self and returns the ip
+    pub fn into_ip(self) -> String{
+        let Discovery{internalipaddress, ..} = self;
+        internalipaddress
     }
 }
 

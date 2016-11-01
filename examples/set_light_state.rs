@@ -6,6 +6,7 @@ use std::time::Duration;
 use regex::Regex;
 
 use philipshue::hue::LightCommand;
+use philipshue::bridge::{discover, Bridge};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -14,7 +15,7 @@ fn main() {
                  args[0]);
         return;
     }
-    let bridge = philipshue::bridge::discover().unwrap().pop().unwrap().build_bridge().from_username(args[1].clone());
+    let bridge = Bridge::new(discover().unwrap().pop().unwrap().into_ip(), &*args[1]);
     let ref input_lights: Vec<usize> = args[2].split(",").map(|s| s.parse::<usize>().unwrap()).collect();
     let ref command = args[3];
     let re_triplet = Regex::new("([0-9]{0,3}):([0-9]{0,5}):([0-9]{0,3})").unwrap();
