@@ -56,18 +56,11 @@ pub fn register_user(ip: &str, devicetype: &str) -> Result<String, HueError>{
     let body = format!("{{\"devicetype\": {:?}}}", devicetype);
     let body = body.as_bytes();
     let url = format!("http://{}/api", ip);
-    let mut resp = match client.post(&url)
+    let mut resp = try!(client.post(&url)
         .body(Body::BufBody(body, body.len()))
-        .send() {
-            Ok(r) => r,
-            Err(e) => return Err(HueError::from(e))
-        };
+        .send());
 
-
-    let rur = match from_reader::<_, Vec<HueResponse<User>>>(&mut resp) {
-        Ok(mut r) => r.pop().unwrap(),
-        Err(e) => return Err(HueError::from(e))
-    };
+    let rur = try!(from_reader::<_, Vec<HueResponse<User>>>(&mut resp)).pop().unwrap();
 
     if let Some(User{username}) = rur.success{
         Ok(username)
