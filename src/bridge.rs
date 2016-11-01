@@ -1,5 +1,3 @@
-use regex::Regex;
-
 use hyper::Client;
 use hyper::client::Body;
 
@@ -17,54 +15,27 @@ pub fn discover() -> Result<Vec<Discovery>, HueError> {
         .and_then(|ref mut r| from_reader(r).map_err(From::from))
 }
 
-/// A builder object for a `Bridge` object
-#[derive(Debug)]
-pub struct BridgeBuilder{
-    ip: String
-}
-
-impl BridgeBuilder{
-    /// Starts building a `Bridge` from the given IP
-    pub fn from_ip(ip: String) -> Self{
-        BridgeBuilder{
-            ip: ip
-        }
-    }
-    /// Returns a `Bridge` from an already existing user
-    pub fn from_username(self, username: String) -> Bridge {
-        let BridgeBuilder{ip} = self;
-        Bridge {
-            client: Client::new(),
-            username: username,
-            ip: ip
-        }
-    }
-    /// Registers a new user on the bridge
-    pub fn register_user(self, devicetype: &str) -> RegisterIter{
-        RegisterIter(Some(self), devicetype)
-    }
-}
-
-#[derive(Debug)]
-/// Iterator that tries to register a new user each iteration
+/// Tries to register a user, returning the username if successful
 ///
-/// It will most likely respond with an error saying that the link button needs to be pressed the first time
-///
+/// This usually returns a `HueError::BridgeError` saying the link button needs to be pressed.
+/// Therefore it recommended to call this function in a loop:
 /// ## Example
 /// ```no_run
 /// use philipshue::errors::{HueError, BridgeError};
+/// use philipshue::bridge::{self, Bridge};
 ///
 /// let mut bridge = None;
 /// // Discover a bridge
-/// let discovery = philipshue::bridge::discover().unwrap().pop().unwrap();
-/// let devicetype = "my_hue_app#iphone";
+/// let bridge_ip = philipshue::bridge::discover().unwrap().pop().unwrap().into_ip();
+/// let devicetype = "my_hue_app#homepc";
 ///
 /// // Keep trying to register a user
-/// for res in discovery.build_bridge().register_user(devicetype){
-///     match res{
-///         // A new user has succesfully been registered and a `Bridge` object is returned
-///         Ok(r) => {
-///             bridge = Some(r);
+/// loop{
+///     match bridge::register_user(&bridge_ip, devicetype){
+///         // A new user has succesfully been registered and the username is returned
+///         Ok(username) => {
+///             bridge = Some(Bridge::new(bridge_ip, username));
+///             break;
 ///         },
 ///         // Prompt the user to press the link button
 ///         Err(HueError::BridgeError{error: BridgeError::LinkButtonNotPressed, ..}) => {
@@ -79,47 +50,76 @@ impl BridgeBuilder{
 ///     }
 /// }
 /// ```
-pub struct RegisterIter<'a>(Option<BridgeBuilder>, &'a str);
+pub fn register_user(ip: &str, devicetype: &str) -> Result<String, HueError>{
+    let client = Client::new();
 
-impl<'a> Iterator for RegisterIter<'a> {
-    type Item = Result<Bridge, HueError>;
-    fn next(&mut self) -> Option<Self::Item>{
-        if let Some(bb) = ::std::mem::replace(&mut self.0, None){
-            let client = Client::new();
+    let body = format!("{{\"devicetype\": {:?}}}", devicetype);
+    let body = body.as_bytes();
+    let url = format!("http://{}/api", ip);
+    let mut resp = try!(client.post(&url)
+        .body(Body::BufBody(body, body.len()))
+        .send());
 
-            let body = format!("{{\"devicetype\": {:?}}}", self.1);
-            let body = body.as_bytes();
-            let url = format!("http://{}/api", bb.ip);
-            let mut resp = match client.post(&url)
-                .body(Body::BufBody(body, body.len()))
-                .send() {
-                    Ok(r) => r,
-                    Err(e) => return Some(Err(HueError::from(e)))
-                };
+    let rur = try!(from_reader::<_, Vec<HueResponse<User>>>(&mut resp)).pop().unwrap();
 
+    if let Some(User{username}) = rur.success{
+        Ok(username)
+    }else if let Some(error) = rur.error{
+        Err(error.into())
+    }else{
+        Err(HueError::MalformedResponse)
+    }
+}
 
-            let rur = match from_reader::<_, Vec<HueResponse<User>>>(&mut resp) {
-                Ok(mut r) => r.pop().unwrap(),
-                Err(e) => return Some(Err(HueError::from(e)))
-            };
+#[derive(Debug, Clone)]
+/// A light with an ID
+pub struct IdentifiedLight {
+    /// The ID number of this light
+    pub id: usize,
+    /// The light object
+    pub light: Light,
+}
 
-            Some(if let Some(User{username}) = rur.success{
-                let BridgeBuilder{ip} = bb;
+impl IdentifiedLight {
+    /// Sets the state of a light by sending a `LightCommand` to the bridge for this light
+    pub fn set_state(&mut self, bridge: &Bridge, command: LightCommand) -> Result<Vec<HueResponse<Value>>, HueError>{
+        let url = format!("http://{}/api/{}/lights/{}/state",
+                          bridge.ip,
+                          bridge.username,
+                          self.id);
+        let body = ::clean::clean_json(try!(to_string(&command)));
+        let body = body.as_bytes();
 
-                Ok(Bridge{
-                    ip: ip,
-                    client: client,
-                    username: username
-                })
-            }else if let Some(error) = rur.error{
-                self.0 = Some(bb);
-                Err(error.into())
-            }else{
-                Err(HueError::MalformedResponse)
-            })
-        }else{
-            None
+        let resps: Vec<HueResponse<Value>> = try!(bridge.client
+            .put(&url)
+            .body(Body::BufBody(body, body.len()))
+            .send()
+            .map_err(HueError::from)
+            .and_then(|ref mut resp| from_reader(resp).map_err(From::from)));
+
+        let id = self.id.to_string();
+
+        for resp in &resps{
+            if let Some(Value::Object(ref m)) = resp.success{
+                for (k, v) in m{
+                    let mut k_iter = k.split('/');
+                    if k_iter.next() == Some("") && k_iter.next() == Some("lights")
+                    && k_iter.next() == Some(&*id) && k_iter.next() == Some("state"){
+                        if let Some(field) = k_iter.next(){
+                            match field{
+                                "on"  => self.light.state.on  = v.as_bool().unwrap(),
+                                "bri" => self.light.state.bri = v.as_u64().unwrap() as u8,
+                                "hue" => self.light.state.hue = v.as_u64().unwrap() as u16,
+                                "sat" => self.light.state.sat = v.as_u64().unwrap() as u8,
+                                "ct"  => self.light.state.ct  = v.as_u64().map(|v| v as u16),
+                                _ => ()
+                            }
+                        }
+                    }
+                }
+            }
         }
+        Ok(resps)
     }
 }
 
@@ -134,14 +134,22 @@ pub struct Bridge {
 }
 
 impl Bridge {
-    /// Gets all lights from the bridge
-    pub fn get_all_lights(&self) -> Result<Vec<IdentifiedLight>, HueError> {
+    /// Creates a `Bridge` on the given IP with the given username
+    pub fn new<S: Into<String>, U: Into<String>>(ip: S, username: U) -> Self{
+        Bridge{
+            client: Client::new(),
+            ip: ip.into(),
+            username: username.into()
+        }
+    }
+    /// Gets all lights that are connected to the bridge
+    pub fn get_lights(&self) -> Result<Vec<IdentifiedLight>, HueError> {
         self.client
             .get(&format!("http://{}/api/{}/lights", self.ip, self.username))
             .send()
             .map_err(HueError::from)
             .and_then(|ref mut resp| from_reader::<_, Map<usize, Light>>(resp).map_err(From::from))
-            .map(|json: Map<usize, Light>|{
+            .map(|json: Map<usize, Light>| {
                 let mut lights: Vec<_> = json
                     .into_iter()
                     .map(|(id, light)| {
@@ -154,25 +162,5 @@ impl Bridge {
                 lights.sort_by_key(|x| x.id);
                 lights
             })
-    }
-    /// Sends a `LightCommand` to set the state of a light
-    pub fn set_light_state(&self, light: usize, command: LightCommand) -> Result<Vec<HueResponse<Value>>, HueError> {
-        let url = format!("http://{}/api/{}/lights/{}/state",
-                          self.ip,
-                          self.username,
-                          light);
-        let body = try!(to_string(&command));
-        let re1 = Regex::new("\"[a-z]*\":null,?").unwrap();
-        let cleaned1 = re1.replace_all(&body, "");
-        let re2 = Regex::new(",\\}").unwrap();
-        let cleaned2 = re2.replace_all(&cleaned1, "}");
-        let body = cleaned2.as_bytes();
-
-        self.client
-            .put(&url)
-            .body(Body::BufBody(body, body.len()))
-            .send()
-            .map_err(HueError::from)
-            .and_then(|ref mut resp| from_reader(resp).map_err(From::from))
     }
 }

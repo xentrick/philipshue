@@ -1,5 +1,6 @@
 extern crate philipshue;
 use std::env;
+use philipshue::bridge::{discover, Bridge};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -7,9 +8,9 @@ fn main() {
         println!("usage : {:?} <username>", args[0]);
         return;
     }
-    let bridge = philipshue::bridge::discover().unwrap().pop().unwrap().build_bridge().from_username(args[1].clone());
-    
-    match bridge.get_all_lights() {
+    let bridge = Bridge::new(discover().unwrap().pop().unwrap().into_ip(), &*args[1]);
+
+    match bridge.get_lights() {
         Ok(lights) => {
             println!("id name                 on    bri   hue sat temp");
             for ref l in lights.iter() {
