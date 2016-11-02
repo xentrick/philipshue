@@ -2,7 +2,7 @@ extern crate philipshue;
 use philipshue::bridge;
 
 fn main() {
-    let discovery = bridge::discover().unwrap().pop().unwrap();
+    let discoveries = bridge::discover().unwrap();
 
-    println!("Hue bridge found; IP: {}, ID: {}", discovery.ip(), discovery.id());
+    println!("Hue bridges found: {:#?}", discoveries);
 }

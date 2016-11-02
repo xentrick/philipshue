@@ -62,8 +62,10 @@ pub struct LightCommand {
 #[derive(Debug, Clone, Deserialize)]
 /// Responses from the `discover` function
 pub struct Discovery{
-    id: String,
-    internalipaddress: String
+    /// The ID of the bridge
+    pub id: String,
+    /// The local IP address of the bridge
+    pub internalipaddress: String
 }
 
 impl Discovery {
@@ -75,7 +77,7 @@ impl Discovery {
     pub fn id(&self) -> &str{
         &self.id
     }
-    /// Consumes self and returns the ip
+    /// Consumes self and returns the IP
     pub fn into_ip(self) -> String{
         let Discovery{internalipaddress, ..} = self;
         internalipaddress
