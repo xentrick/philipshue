@@ -12,6 +12,11 @@ repository = "http://github.com/Orangenosecom/philipshue"
 readme = "README.md"
 license = "MIT"
 keywords = [ "Philips", "hue", "light", "bulb" ]
+exclude = [
+    ".gitignore",
+    ".travis.yml",
+    "appveyor.yml"
+]
 build = "build.rs"
 
 [build-dependencies]
