@@ -84,72 +84,78 @@ pub struct IdentifiedLight {
 /// The bridge connection
 pub struct Bridge {
     client: Client,
-    /// The IP address of the bridge
-    pub ip: String,
-    /// The username for the user on the bridge
-    pub username: String,
+    url: String
 }
 
-fn send<T: Deserialize>(rb: RequestBuilder) -> Result<T, HueError>{
+fn send_with_body<'a, T: Deserialize>(rb: RequestBuilder<'a>, body: &'a str) -> Result<T, HueError> {
+    send(rb.body(Body::BufBody(body.as_bytes(), body.len())))
+}
+
+fn send<T: Deserialize>(rb: RequestBuilder) -> Result<T, HueError> {
     rb.send()
       .map_err(HueError::from)
       .and_then(|ref mut resp| from_reader::<_, T>(resp).map_err(From::from))
 }
 
+#[test]
+fn get_ip_and_username() {
+    let b = Bridge::new("test", "hello");
+    assert_eq!(b.get_ip(), "test");
+    assert_eq!(b.get_username(), "hello");
+}
+
 use serde::Deserialize;
 use hyper::client::RequestBuilder;
+use ::clean::clean_json;
 
 impl Bridge {
     /// Creates a `Bridge` on the given IP with the given username
     pub fn new<S: Into<String>, U: Into<String>>(ip: S, username: U) -> Self{
         Bridge{
             client: Client::new(),
-            ip: ip.into(),
-            username: username.into()
+            url: format!("http://{}/api/{}/", ip.into(), username.into())
         }
     }
-    fn url(&self) -> String {
-        format!("http://{}/api/{}/", self.ip, self.username)
+    /// Gets the IP of bridge
+    pub fn get_ip(&self) -> &str{
+        self.url.split('/').nth(2).unwrap()
     }
-    fn put<T: Deserialize>(&self, request: &str, body: String) -> Result<T, HueError> {
-        let url = self.url() + request;
-        let body = ::clean::clean_json(body);
-        let body = body.as_bytes();
-
-        send(self.client
-            .put(&url)
-            .body(Body::BufBody(body, body.len())))
+    /// Gets the username this `Bridge` uses
+    pub fn get_username(&self) -> &str{
+        self.url.split('/').nth(4).unwrap()
     }
-    fn post<T: Deserialize>(&self, request: &str, body: String) -> Result<T, HueError> {
-        let url = self.url() + request;
-        let body = ::clean::clean_json(body);
-        let body = body.as_bytes();
-
-        send(self.client
-            .post(&url)
-            .body(Body::BufBody(body, body.len()))
-        )
-    }
-    fn get<T: Deserialize>(&self, request: &str) -> Result<T, HueError> {
-        send(self.client.get(&format!("{}{}", self.url(), request)))
-    }
-    fn delete<T: Deserialize>(&self, request: &str) -> Result<T, HueError> {
-        send(self.client.delete(&format!("{}{}", self.url(), request)))
-    }
-    // TODO search for new lights
-    // TODO get new lights
-    // TODO rename light
-    // TODO delete lights?
     /// Gets all lights that are connected to the bridge
     pub fn get_all_lights(&self) -> Result<Map<usize, Light>, HueError> {
-        self.get("lights")
+        send(self.client.get(&format!("{}lights", self.url)))
     }
     /// Gets the light with the specific id
     pub fn get_light(&self, id: usize) -> Result<Light, HueError> {
-        self.get(&format!("lights/{}", id))
+        send(self.client.get(&format!("{}lights/{}", self.url, id)))
+    }
+    /// Gets all the light that were found last time a search for new lights was done
+    pub fn get_new_lights(&self) -> Result<Map<usize, Light>, HueError> {
+        // TODO return lastscan too
+        send(self.client.get(&format!("{}lights/new", self.url)))
+    }
+    /// Makes the bridge search for new lights (and switches).
+    ///
+    /// The found lights can be retrieved with `get_new_lights()`
+    pub fn search_for_new_lights(&self) -> Result<(), HueError> {
+        // TODO Allow deviceids to be specified
+        send(self.client.post(&format!("{}lights", self.url)))
     }
     /// Sets the state of a light by sending a `LightCommand` to the bridge for this light
     pub fn set_light_state(&self, id: usize, command: LightCommand) -> Result<Vec<HueResponse<Value>>, HueError>{
-        self.put(&format!("lights/{}/state", id), try!(to_string(&command)))
+        send_with_body(self.client.put(&format!("{}lights/{}/state", self.url, id)), &clean_json(to_string(&command)?))
+    }
+    /// Renames the light
+    pub fn rename_light(&self, id: usize, name: String) -> Result<(), HueError> {
+        let mut name_map = Map::new();
+        name_map.insert("name".to_owned(), name);
+        send_with_body(self.client.put(&format!("{}lights/{}", self.url, id)), &clean_json(to_string(&name_map)?))
+    }
+    /// Deletes a light from the bridge
+    pub fn delete_light(&self, id: usize) -> Result<(), HueError> {
+        send(self.client.delete(&format!("{}lights/{}", self.url, id)))
     }
 }
