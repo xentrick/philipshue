@@ -23,7 +23,7 @@ fn run() -> Result<(), ParseIntError> {
         return Ok(());
     }
     let bridge = Bridge::new(discover().unwrap().pop().unwrap().into_ip(), &*args[1]);
-    let ref input_lights: Vec<usize> = args[2].split(",").fold(Ok(Vec::new()), |v, s| v.and_then(|mut v| s.parse::<usize>().map(|n| v.push(n)).map(|_| v)))?;
+    let input_lights = args[2].split(",").fold(Ok(Vec::new()), |v, s| v.and_then(|mut v| s.parse::<usize>().map(|n| v.push(n)).map(|_| v)))?;
 
     let cmd = LightCommand::default();
 
@@ -53,7 +53,7 @@ fn run() -> Result<(), ParseIntError> {
         _ => panic!("Invalid command!")
     };
 
-    for &id in input_lights.into_iter() {
+    for id in input_lights.into_iter() {
         match bridge.set_light_state(id, &cmd){
             Ok(resps) => for resp in resps.into_iter(){
                 if let Some(success) = resp.success{
@@ -69,7 +69,6 @@ fn run() -> Result<(), ParseIntError> {
 
     Ok(())
 }
-
 
 fn rgb_to_hsv(r: u8, g: u8, b: u8) -> (u16, u8, u8) {
     let r = r as f64 / 255f64;
