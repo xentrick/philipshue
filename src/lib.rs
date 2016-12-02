@@ -19,7 +19,7 @@ extern crate lazy_static;
 mod clean{
     use regex::Regex;
     lazy_static!{
-        static ref REMOVE_NULL: Regex = Regex::new(r#""[a-z]*":null,?"#).unwrap();
+        static ref REMOVE_NULL: Regex = Regex::new(r#""\w*":null,?"#).unwrap();
         static ref TRAILING_COMMA: Regex = Regex::new(r",\}").unwrap();
     }
     /// Removes null values from the JSON-formatted String
