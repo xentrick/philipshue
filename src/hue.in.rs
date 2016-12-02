@@ -77,6 +77,65 @@ pub struct LightCommand {
     pub xy_inc: Option<(i16, i16)>,
 }
 
+impl LightCommand {
+    /// Returns a `LightCommand` that turns a light on
+    pub fn on(self) -> Self {
+        LightCommand { on: Some(true), ..self }
+    }
+    /// Returns a `LightCommand` that turns a light on
+    pub fn off(self) -> Self {
+        LightCommand { on: Some(false), ..self }
+    }
+    /// Sets the brightness to set the light to
+    pub fn with_bri(self, b: u8) -> Self {
+        LightCommand { bri: Some(b), ..self }
+    }
+    /// Sets the hue to set the light to
+    pub fn with_hue(self, h: u16) -> Self {
+        LightCommand { hue: Some(h), ..self }
+    }
+    /// Sets the saturation to set the light to
+    pub fn with_sat(self, s: u8) -> Self {
+        LightCommand { sat: Some(s), ..self }
+    }
+    /// Sets the xy colour coordinates to set the light to
+    pub fn with_xy(self, xy: (f32, f32)) -> Self {
+        LightCommand { xy: Some(xy), ..self }
+    }
+    /// Sets the temperature to set the light to
+    pub fn with_ct(self, c: u16) -> Self {
+        LightCommand { ct: Some(c), ..self }
+    }
+    /// Sets the alert mode to set the light to
+    pub fn with_alert(self, a: String) -> Self {
+        LightCommand { alert: Some(a), ..self }
+    }
+    /// Sets the effect mode to set the light to
+    pub fn with_effect(self, a: String) -> Self {
+        LightCommand { effect: Some(a), ..self }
+    }
+    /// Sets the brightness increment value
+    pub fn with_bri_inc(self, b: i16) -> Self {
+        LightCommand { bri_inc: Some(b), ..self }
+    }
+    /// Sets the hue increment value
+    pub fn with_hue_inc(self, h: i16) -> Self {
+        LightCommand { hue_inc: Some(h), ..self }
+    }
+    /// Sets the saturation increment value
+    pub fn with_sat_inc(self, s: i16) -> Self {
+        LightCommand { sat_inc: Some(s), ..self }
+    }
+    /// Sets the saturation increment value
+    pub fn with_ct_inc(self, ct: i16) -> Self {
+        LightCommand { ct_inc: Some(ct), ..self }
+    }
+    /// Sets the x and y increment value
+    pub fn with_xy_inc(self, xy: (i16, i16)) -> Self {
+        LightCommand { xy_inc: Some(xy), ..self }
+    }
+}
+
 #[derive(Debug, Clone, Deserialize)]
 /// Responses from the `discover` function
 pub struct Discovery{
@@ -99,33 +158,6 @@ impl Discovery {
     pub fn into_ip(self) -> String{
         let Discovery{internalipaddress, ..} = self;
         internalipaddress
-    }
-}
-
-impl LightCommand {
-    /// Returns a `LightCommand` that turns a light on
-    pub fn on(self) -> Self {
-        LightCommand { on: Some(true), ..self }
-    }
-    /// Returns a `LightCommand` that turns a light on
-    pub fn off(self) -> Self {
-        LightCommand { on: Some(false), ..self }
-    }
-    /// Sets the brightness to set the light to
-    pub fn with_bri(self, b: u8) -> Self {
-        LightCommand { bri: Some(b), ..self }
-    }
-    /// Sets the hue to set the light to
-    pub fn with_hue(self, h: u16) -> Self {
-        LightCommand { hue: Some(h), ..self }
-    }
-    /// Sets the saturation to set the light to
-    pub fn with_sat(self, s: u8) -> Self {
-        LightCommand { sat: Some(s), ..self }
-    }
-    /// Sets the temperature to set the light to
-    pub fn with_ct(self, c: u16) -> Self {
-        LightCommand { ct: Some(c), ..self }
     }
 }
 
