@@ -12,7 +12,7 @@ pub struct LightState {
     /// Staturation of the light. 254 is the most saturated (colored) and 0 is the least (white).
     pub sat: Option<u8>,
     /// The x and y coordinates of a colour in [CIE space](http://www.developers.meethue.com/documentation/core-concepts#color_gets_more_complicated)
-    pub xy: Option<[f32; 2]>,
+    pub xy: Option<(f32, f32)>,
     /// The [mired](http://en.wikipedia.org/wiki/Mired) colour temperature of the light.
     pub ct: Option<u16>,
     /// The [alert effect](http://www.developers.meethue.com/documentation/core-concepts#some_extra_fun_stuff)
@@ -42,7 +42,7 @@ pub struct Light {
     pub state: LightState
 }
 
-#[derive(Debug, Default, Clone, Copy, Serialize)]
+#[derive(Debug, Default, Clone, Serialize)]
 /// Struct for building a command that will be sent to the Hue bridge telling it what to do with a light
 ///
 /// View [the lights-api documention](http://www.developers.meethue.com/documentation/lights-api) for more information
@@ -55,8 +55,26 @@ pub struct LightCommand {
     pub hue: Option<u16>,
     /// The saturation of the colour of the light
     pub sat: Option<u8>,
+    /// The x and y coordinates of a colour in [CIE space](http://www.developers.meethue.com/documentation/core-concepts#color_gets_more_complicated)
+    pub xy: Option<(f32, f32)>,
     /// The Mired Color temperature of the light. 2012 connected lights are capable of 153 (6500K) to 500 (2000K).
     pub ct: Option<u16>,
+    /// The [alert effect](http://www.developers.meethue.com/documentation/core-concepts#some_extra_fun_stuff)
+    pub alert: Option<String>,
+    /// The dynamic effect of the light. It can be either "none" or "colorloop"
+    ///
+    /// If "colorloop", the light will cycle hues
+    pub effect: Option<String>,
+    /// Has to be a value between -254 and 254. Increments or decrements the value of the brightness.
+    pub bri_inc: Option<i16>,
+    /// Has to be a value between -254 and 254. Increments or decrements the value of the saturation.
+    pub sat_inc: Option<i16>,
+    /// Has to be a value between -65534 and 65534. Increments or decrements the value of the hue.
+    pub hue_inc: Option<i16>,
+    /// Has to be a value between -65534 and 65534. Increments or decrements the value of the colour temperature.
+    pub ct_inc: Option<i16>,
+    /// Increments or decrements the value of the xy.
+    pub xy_inc: Option<(i16, i16)>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

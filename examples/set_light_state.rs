@@ -63,7 +63,7 @@ fn main() {
     };
 
     for &id in input_lights.into_iter() {
-        match bridge.set_light_state(id, parsed){
+        match bridge.set_light_state(id, &parsed){
             Ok(resps) => for resp in resps.into_iter(){
                 if let Some(success) = resp.success{
                     println!("Success: {:?}", success)
