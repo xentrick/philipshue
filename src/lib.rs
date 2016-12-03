@@ -16,6 +16,9 @@ extern crate regex;
 #[macro_use]
 extern crate lazy_static;
 
+pub use bridge::{discover, Bridge};
+pub use hue::LightCommand;
+
 mod clean{
     use regex::Regex;
     lazy_static!{
