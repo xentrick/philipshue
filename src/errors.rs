@@ -1,7 +1,6 @@
 use hyper;
 use std::convert::From;
 use serde_json;
-use std::num::ParseIntError;
 
 impl From<::json::Error> for HueError {
     fn from(e: ::json::Error) -> HueError {
@@ -14,19 +13,17 @@ impl From<::json::Error> for HueError {
 }
 
 error_chain! {
-    
     types {
         HueError, HueErrorKind, ResultExt, Result;
     }
-
+    
     errors {
-        /// this does not happen in practice
-        MalformedResponse { }
         /// An error that occured in the bridge
+        #[allow(missing_docs)]
         BridgeError {
-            address:String,
-            description:String,
-            error:BridgeError
+            address: String,
+            description: String,
+            error: BridgeError
         } {
             description("bridge error")
             display("Bridge error: {:?} address: {} description: {}", error, address, description)
@@ -36,9 +33,7 @@ error_chain! {
     foreign_links {
         JsonError(serde_json::Error) #[doc = "Json Error"];
         HyperError(hyper::Error)     #[doc = "Hyper Error"];
-        ParseIntError(ParseIntError) #[doc = "Parser Error"];
     }
-    
 }
 
 macro_rules! error_enum {
