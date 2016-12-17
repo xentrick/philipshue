@@ -34,9 +34,9 @@ error_chain! {
     }
     
     foreign_links {
-        JsonError(serde_json::Error);
-        HyperError(hyper::Error);
-        ParseIntError(ParseIntError);
+        JsonError(serde_json::Error) #[doc = "Json Error"];
+        HyperError(hyper::Error)     #[doc = "Hyper Error"];
+        ParseIntError(ParseIntError) #[doc = "Parser Error"];
     }
     
 }
