@@ -25,7 +25,7 @@ error_chain! {
         /// An error that occured in the bridge
         BridgeError { address:String, description:String, error:BridgeError} {
             description("bridge error")
-            display("Bridge error: {} {} {:?}", address, description, error)
+            display("Bridge error: {:?} address: {} description: {}", error, address, description)
         }
     }
     
