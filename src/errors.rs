@@ -16,7 +16,7 @@ error_chain! {
     types {
         HueError, HueErrorKind, ResultExt, Result;
     }
-    
+
     errors {
         /// An error that occured in the bridge
         #[allow(missing_docs)]
@@ -29,10 +29,10 @@ error_chain! {
             display("Bridge error: {:?} address: {} description: {}", error, address, description)
         }
     }
-    
+
     foreign_links {
-        JsonError(serde_json::Error) #[doc = "Json Error"];
-        HyperError(hyper::Error)     #[doc = "Hyper Error"];
+        JsonError(serde_json::Error) #[doc = "Json error"];
+        HyperError(hyper::Error)     #[doc = "Hyper error"];
     }
 }
 

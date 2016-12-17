@@ -7,8 +7,7 @@ use errors::{Result, HueError};
 use ::hue::*;
 use ::json::*;
 
-/// Attempt to discover bridges using `https://www.meethue.com/api/nupnp`
-
+/// Attempts to discover bridges using `https://www.meethue.com/api/nupnp`
 #[cfg(feature = "nupnp")]
 pub fn discover() -> Result<Vec<Discovery>> {
     Client::new()
@@ -17,7 +16,7 @@ pub fn discover() -> Result<Vec<Discovery>> {
         .map_err(HueError::from)
         .and_then(|ref mut r| from_reader(r).map_err(From::from))
 }
-/// Discover bridge IP using UPnP
+/// Discovers bridge IP using UPnP
 ///
 /// Waits for about 5 seconds to make sure it gets a response
 #[cfg(feature = "ssdp")]
