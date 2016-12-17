@@ -1,6 +1,9 @@
 extern crate philipshue;
 use std::env;
-use philipshue::bridge::{discover, Bridge};
+use philipshue::bridge::Bridge;
+
+mod discover;
+use discover::discover;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -8,7 +11,7 @@ fn main() {
         println!("Usage : {:?} <username>", args[0]);
         return;
     }
-    let bridge = Bridge::new(discover().unwrap().pop().unwrap().into_ip(), &*args[1]);
+    let bridge = Bridge::new(discover().pop().unwrap(), &*args[1]);
 
     match bridge.get_all_groups() {
         Ok(groups) => {

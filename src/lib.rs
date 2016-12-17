@@ -18,7 +18,11 @@ extern crate lazy_static;
 #[macro_use]
 extern crate error_chain;
 
-pub use bridge::{discover, Bridge};
+pub use bridge::Bridge;
+#[cfg(feature = "nupnp")]
+pub use bridge::discover;
+#[cfg(feature = "upnp")]
+pub use bridge::discover_upnp;
 pub use hue::LightCommand;
 
 mod clean{

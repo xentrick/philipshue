@@ -7,13 +7,15 @@ use std::time::Duration;
 use philipshue::bridge;
 use philipshue::errors::{HueError, HueErrorKind, BridgeError};
 
+mod discover;
+use discover::discover;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
         println!("usage : {:?} <devicetype>", args[0]);
     } else {
-        let discovery = philipshue::bridge::discover().unwrap().pop().unwrap();
-        let ip = discovery.ip();
+        let ip = discover().pop().unwrap();
 
         loop{
             match bridge::register_user(&ip, &*args[1]){

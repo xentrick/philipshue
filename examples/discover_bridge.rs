@@ -1,8 +1,8 @@
 extern crate philipshue;
-use philipshue::bridge;
+
+mod discover;
+use discover::discover;
 
 fn main() {
-    let discoveries = bridge::discover().unwrap();
-
-    println!("Hue bridges found: {:#?}", discoveries);
+    println!("Hue bridges found: {:#?}", discover());
 }

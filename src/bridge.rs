@@ -8,6 +8,8 @@ use ::hue::*;
 use ::json::*;
 
 /// Attempt to discover bridges using `https://www.meethue.com/api/nupnp`
+
+#[cfg(feature = "nupnp")]
 pub fn discover() -> Result<Vec<Discovery>> {
     Client::new()
         .get("https://www.meethue.com/api/nupnp")

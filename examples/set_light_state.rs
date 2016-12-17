@@ -6,7 +6,10 @@ use std::time::Duration;
 use std::num::ParseIntError;
 
 use philipshue::hue::LightCommand;
-use philipshue::bridge::{discover, Bridge};
+use philipshue::bridge::Bridge;
+
+mod discover;
+use discover::discover;
 
 fn main(){
     match run(){
@@ -22,7 +25,7 @@ fn run() -> Result<(), ParseIntError> {
                  args[0]);
         return Ok(());
     }
-    let bridge = Bridge::new(discover().unwrap().pop().unwrap().into_ip(), &*args[1]);
+    let bridge = Bridge::new(discover().pop().unwrap(), &*args[1]);
     let input_lights = args[2].split(",").fold(Ok(Vec::new()), |v, s| v.and_then(|mut v| s.parse::<usize>().map(|n| v.push(n)).map(|_| v)))?;
 
     let cmd = LightCommand::default();

@@ -22,8 +22,9 @@ exclude = [
 build = "build.rs"
 
 [features]
-default = ["serde_codegen"]
+default = ["serde_codegen", "nupnp"]
 upnp = ["ssdp"]
+nupnp = ["hyper/ssl"]
 unstable = ["serde_derive", "upnp"]
 
 [build-dependencies]
@@ -41,4 +42,4 @@ error-chain = "0.7"
 [dependencies.hyper]
 version = "0.9.11"
 default-features = false
-features = ["ssl", "serde-serialization"]
+features = ["serde-serialization"]
