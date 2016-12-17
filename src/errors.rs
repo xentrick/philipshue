@@ -23,7 +23,11 @@ error_chain! {
         /// this does not happen in practice
         MalformedResponse { }
         /// An error that occured in the bridge
-        BridgeError { address:String, description:String, error:BridgeError} {
+        BridgeError {
+            address:String,
+            description:String,
+            error:BridgeError
+        } {
             description("bridge error")
             display("Bridge error: {:?} address: {} description: {}", error, address, description)
         }
