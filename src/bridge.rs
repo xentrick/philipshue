@@ -20,7 +20,7 @@ pub fn discover() -> Result<Vec<Discovery>> {
 ///
 /// Waits for about 5 seconds to make sure it gets a response
 #[cfg(feature = "ssdp")]
-pub fn discover_upnp() -> ::std::result::Result<Vec<String>, ::ssdp::SSDPError>{
+pub fn discover_upnp() -> ::std::result::Result<Vec<String>, ::ssdp::SSDPError> {
     use ssdp::header::{HeaderMut, Man, MX, ST};
     use ssdp::message::SearchRequest;
     use ssdp::FieldMap;
@@ -31,10 +31,11 @@ pub fn discover_upnp() -> ::std::result::Result<Vec<String>, ::ssdp::SSDPError>{
     request.set(MX(5));
     request.set(ST::Target(FieldMap::upnp("IpBridge")));
 
-    request.multicast().map(|r| r
-        .into_iter()
-        .map(|(_, src)| src.ip().to_string())
-        .collect())
+    request.multicast().map(|r| {
+        r.into_iter()
+            .map(|(_, src)| src.ip().to_string())
+            .collect()
+    })
 }
 /// Tries to register a user, returning the username if successful
 ///
@@ -71,7 +72,7 @@ pub fn discover_upnp() -> ::std::result::Result<Vec<String>, ::ssdp::SSDPError>{
 ///     }
 /// }
 /// ```
-pub fn register_user(ip: &str, devicetype: &str) -> Result<String>{
+pub fn register_user(ip: &str, devicetype: &str) -> Result<String> {
     let client = Client::new();
 
     let body = format!("{{\"devicetype\": {:?}}}", devicetype);
@@ -92,7 +93,7 @@ pub fn register_user(ip: &str, devicetype: &str) -> Result<String>{
 /// The bridge connection
 pub struct Bridge {
     client: Client,
-    url: String
+    url: String,
 }
 
 fn send_with_body<'a, T: Deserialize>(rb: RequestBuilder<'a>, body: &'a str) -> Result<T> {
@@ -101,8 +102,8 @@ fn send_with_body<'a, T: Deserialize>(rb: RequestBuilder<'a>, body: &'a str) -> 
 
 fn send<T: Deserialize>(rb: RequestBuilder) -> Result<T> {
     rb.send()
-      .map_err(HueError::from)
-      .and_then(|ref mut resp| from_reader::<_, T>(resp).map_err(From::from))
+        .map_err(HueError::from)
+        .and_then(|ref mut resp| from_reader::<_, T>(resp).map_err(From::from))
 }
 
 #[test]
@@ -122,7 +123,7 @@ use ::clean::clean_json;
 
 fn extract<T: Deserialize>(responses: Vec<HueResponse<T>>) -> Result<Vec<T>> {
     let mut res_v = Vec::with_capacity(responses.len());
-    for val in responses{
+    for val in responses {
         res_v.push(val.into_result()?)
     }
     Ok(res_v)
@@ -130,18 +131,18 @@ fn extract<T: Deserialize>(responses: Vec<HueResponse<T>>) -> Result<Vec<T>> {
 
 impl Bridge {
     /// Creates a `Bridge` on the given IP with the given username
-    pub fn new<S: Into<String>, U: Into<String>>(ip: S, username: U) -> Self{
-        Bridge{
+    pub fn new<S: Into<String>, U: Into<String>>(ip: S, username: U) -> Self {
+        Bridge {
             client: Client::new(),
-            url: format!("http://{}/api/{}/", ip.into(), username.into())
+            url: format!("http://{}/api/{}/", ip.into(), username.into()),
         }
     }
     /// Gets the IP of bridge
-    pub fn get_ip(&self) -> &str{
+    pub fn get_ip(&self) -> &str {
         self.url.split('/').nth(2).unwrap()
     }
     /// Gets the username this `Bridge` uses
-    pub fn get_username(&self) -> &str{
+    pub fn get_username(&self) -> &str {
         self.url.split('/').nth(4).unwrap()
     }
     /// Gets all lights that are connected to the bridge
@@ -165,27 +166,28 @@ impl Bridge {
         send(self.client.post(&format!("{}lights", self.url))).and_then(extract)
     }
     /// Sets the state of a light by sending a `LightCommand` to the bridge for this light
-    pub fn set_light_state(&self, id: usize, command: &LightCommand) -> Result<SuccessVec>{
-        send_with_body(self.client.put(&format!("{}lights/{}/state", self.url, id)), &clean_json(to_string(command)?))
+    pub fn set_light_state(&self, id: usize, command: &LightCommand) -> Result<SuccessVec> {
+        send_with_body(self.client.put(&format!("{}lights/{}/state", self.url, id)),
+                       &clean_json(to_string(command)?))
             .and_then(extract)
     }
     /// Renames the light
     pub fn rename_light(&self, id: usize, name: String) -> Result<SuccessVec> {
         let mut name_map = Map::new();
         name_map.insert("name".to_owned(), name);
-        send_with_body(self.client.put(&format!("{}lights/{}", self.url, id)), &clean_json(to_string(&name_map)?))
+        send_with_body(self.client.put(&format!("{}lights/{}", self.url, id)),
+                       &clean_json(to_string(&name_map)?))
             .and_then(extract)
     }
     /// Deletes a light from the bridge
     pub fn delete_light(&self, id: usize) -> Result<SuccessVec> {
-        send(self.client.delete(&format!("{}lights/{}", self.url, id)))
-            .and_then(extract)
+        send(self.client.delete(&format!("{}lights/{}", self.url, id))).and_then(extract)
     }
 
     // GROUPS
 
     /// Gets all groups of the bridge
-    pub fn get_all_groups(&self) -> Result<Map<usize, Group>>{
+    pub fn get_all_groups(&self) -> Result<Map<usize, Group>> {
         send(self.client.get(&format!("{}groups", self.url)))
     }
     /// Creates a group and returns the ID of the group
@@ -196,10 +198,10 @@ impl Bridge {
             group_type: group_type,
             class: room_class,
             state: None,
-            action: None
+            action: None,
         };
         let r: HueResponse<GroupId> = send_with_body(self.client.post(&format!("{}groups", self.url)),
-            &clean_json(to_string(&g)?))?;
+                                                     &clean_json(to_string(&g)?))?;
         r.into_result().map(|g| g.id)
     }
     /// Gets extra information about a specific group
@@ -208,14 +210,16 @@ impl Bridge {
     }
     /// Set the name, light and class of a group
     pub fn set_group_attributes(&self, id: usize, attr: &GroupCommand) -> Result<SuccessVec> {
-        send_with_body(self.client.put(&format!("{}groups/{}", self.url, id)), &clean_json(to_string(attr)?))
+        send_with_body(self.client.put(&format!("{}groups/{}", self.url, id)),
+                       &clean_json(to_string(attr)?))
             .and_then(extract)
     }
     /// Sets the state of all lights in the group.
     ///
     /// ID 0 is a sepcial group containing all lights known to the bridge
     pub fn set_group_state(&self, id: usize, state: &LightCommand) -> Result<SuccessVec> {
-        send_with_body(self.client.put(&format!("{}groups/{}/action", self.url, id)), &clean_json(to_string(state)?))
+        send_with_body(self.client.put(&format!("{}groups/{}/action", self.url, id)),
+                       &clean_json(to_string(state)?))
             .and_then(extract)
     }
     /// Deletes the specified group
@@ -232,9 +236,10 @@ impl Bridge {
         send(self.client.get(&format!("{}config", self.url)))
     }
     /// Sets some configuration values.
-    pub fn modify_configuration(&self, command: &ConfigurationModifier) -> Result<SuccessVec>{
-        send_with_body(self.client.put(&format!("{}config", self.url)), &clean_json(to_string(command)?))
-        .and_then(extract)
+    pub fn modify_configuration(&self, command: &ConfigurationModifier) -> Result<SuccessVec> {
+        send_with_body(self.client.put(&format!("{}config", self.url)),
+                       &clean_json(to_string(command)?))
+            .and_then(extract)
     }
     /// Deletes the specified user removing them from the whitelist.
     pub fn delete_user(&self, username: &str) -> Result<Vec<String>> {

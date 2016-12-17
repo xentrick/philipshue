@@ -17,7 +17,11 @@ fn main() {
         Ok(groups) => {
             let name_len = std::cmp::max(4, groups.values().map(|l| l.name.len()).max().unwrap_or(4));
             let type_len = std::cmp::max(4, groups.values().map(|l| l.group_type.to_string().len()).max().unwrap_or(4));
-            println!("id {0:1$} {2:3$} class        any_on all_on bri lights", "name", name_len, "type", type_len);
+            println!("id {0:1$} {2:3$} class        any_on all_on bri lights",
+                     "name",
+                     name_len,
+                     "type",
+                     type_len);
             for (id, group) in groups.iter() {
                 println!("{:2} {:name_len$} {:type_len$} {:12} {:6} {:6} {:3} {:?}",
                          id,
@@ -40,20 +44,20 @@ use std::fmt::{self, Display, Debug};
 
 struct Show<'a, T: 'a>(&'a Option<T>);
 
-impl<'a, T: 'a + Display> Display for Show<'a, T>{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
-        match *self.0{
+impl<'a, T: 'a + Display> Display for Show<'a, T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self.0 {
             Some(ref x) => x.fmt(f),
-            _ => Display::fmt("N/A", f)
+            _ => Display::fmt("N/A", f),
         }
     }
 }
 
-impl<'a, T: 'a + Debug> Debug for Show<'a, T>{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
-        match *self.0{
+impl<'a, T: 'a + Debug> Debug for Show<'a, T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self.0 {
             Some(ref x) => x.fmt(f),
-            _ => Display::fmt("N/A", f)
+            _ => Display::fmt("N/A", f),
         }
     }
 }

@@ -5,10 +5,11 @@ use serde_json;
 impl From<::json::Error> for HueError {
     fn from(e: ::json::Error) -> HueError {
         HueErrorKind::BridgeError {
-            address:e.address,
-            description:e.description,
-            error:From::from(e.code)
-        }.into()
+                address: e.address,
+                description: e.description,
+                error: From::from(e.code),
+            }
+            .into()
     }
 }
 

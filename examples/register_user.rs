@@ -17,19 +17,19 @@ fn main() {
     } else {
         let ip = discover().pop().unwrap();
 
-        loop{
-            match bridge::register_user(&ip, &*args[1]){
+        loop {
+            match bridge::register_user(&ip, &*args[1]) {
                 Ok(bridge) => {
                     println!("User registered: {}, on IP: {}", bridge, ip);
                     break;
-                },
-                Err(HueError(HueErrorKind::BridgeError{error: BridgeError::LinkButtonNotPressed, ..}, _)) => {
+                }
+                Err(HueError(HueErrorKind::BridgeError { error: BridgeError::LinkButtonNotPressed, .. }, _)) => {
                     println!("Please, press the link on the bridge. Retrying in 5 seconds");
                     thread::sleep(Duration::from_secs(5));
                 }
-                Err(e) =>{
+                Err(e) => {
                     println!("Unexpected error occured: {:?}", e);
-                    return
+                    return;
                 }
             }
         }
