@@ -14,7 +14,7 @@ script:
 - |
   cargo update -v &&
   if [[ "$TRAVIS_RUST_VERSION" == nightly* ]]; then
-    (cargo test -v --no-default-features --features unstable)
+    (cargo test -v --no-default-features --features "unstable nupnp")
   else
     (cargo test -v)
   fi
