@@ -15,8 +15,15 @@ fn main() {
 
     match bridge.get_all_groups() {
         Ok(groups) => {
-            let name_len = std::cmp::max(4, groups.values().map(|l| l.name.len()).max().unwrap_or(4));
-            let type_len = std::cmp::max(4, groups.values().map(|l| l.group_type.to_string().len()).max().unwrap_or(4));
+            let name_len = std::cmp::max(4,
+                groups.values().map(|l| l.name.len()).max().unwrap_or(4)
+            );
+            let type_len = std::cmp::max(4,
+                groups.values()
+                    .map(|l| l.group_type.to_string().len())
+                    .max()
+                    .unwrap_or(4)
+            );
             println!("id {0:1$} {2:3$} class        any_on all_on bri lights",
                      "name",
                      name_len,
@@ -32,9 +39,9 @@ fn main() {
                          Show(&group.state.as_ref().map(|s| s.all_on)),
                          Show(&group.state.as_ref().and_then(|s| s.bri)),
                          group.lights,
-                         name_len = name_len, type_len = type_len);
+                         name_len = name_len,
+                         type_len = type_len);
             }
-            println!("{:#?}", groups);
         }
         Err(err) => println!("Error: {}", err),
     }
