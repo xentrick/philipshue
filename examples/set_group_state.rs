@@ -1,7 +1,6 @@
 extern crate philipshue;
 
 use std::env;
-use std::time::Duration;
 use std::num::ParseIntError;
 
 use philipshue::hue::LightCommand;
@@ -20,15 +19,14 @@ fn main() {
 fn run() -> Result<(), ParseIntError> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 4 {
-        println!("Usage: {} <username> <light_id>,<light_id>,... on|off|bri <bri>|hue <hue>|sat <sat>|rgb <r> <g> <b>|hsv <hue> <sat> <bri>|mired \
-                  <ct> <bri>|kelvin <temp> <bri>",
+        println!("Usage: {} <username> <group_id> on|off|bri <bri>|hue <hue>|sat \
+                  <sat>|rgb <r> <g> <b>|hsv <hue> <sat> <bri>|mired <ct> <bri>|kelvin <temp> \
+                  <bri>",
                  args[0]);
         return Ok(());
     }
     let bridge = Bridge::new(discover().pop().unwrap(), &*args[1]);
-    let input_lights = args[2].split(",")
-        .fold(Ok(Vec::new()),
-              |v, s| v.and_then(|mut v| s.parse::<usize>().map(|n| v.push(n)).map(|_| v)))?;
+    let group_id: usize = args[2].parse()?;
 
     let cmd = LightCommand::default();
 
@@ -60,16 +58,13 @@ fn run() -> Result<(), ParseIntError> {
         _ => return Ok(println!("Invalid command!")),
     };
 
-    for id in input_lights.into_iter() {
-        match bridge.set_light_state(id, &cmd) {
-            Ok(resps) => {
-                for resp in resps.into_iter() {
-                    println!("{:?}", resp)
-                }
+    match bridge.set_group_state(group_id, &cmd) {
+        Ok(resps) => {
+            for resp in resps.into_iter() {
+                println!("{:?}", resp)
             }
-            Err(e) => println!("Error occured when trying to send request:\n\t{}", e),
         }
-        std::thread::sleep(Duration::from_millis(50))
+        Err(e) => println!("Error occured when trying to send request:\n\t{}", e),
     }
 
     Ok(())
