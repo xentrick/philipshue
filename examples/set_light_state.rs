@@ -58,7 +58,7 @@ fn run() -> Result<(), ParseIntError> {
                 .with_bri(args[5].parse()?)
                 .with_sat(254)
         }
-        _ => panic!("Invalid command!"),
+        _ => return Ok(println!("Invalid command!")),
     };
 
     for id in input_lights.into_iter() {
@@ -68,7 +68,7 @@ fn run() -> Result<(), ParseIntError> {
                     println!("{:?}", resp)
                 }
             }
-            Err(e) => println!("Error happened trying to send request:\n\t{:?}", e),
+            Err(e) => println!("Error occured when trying to send request:\n\t{}", e),
         }
         std::thread::sleep(Duration::from_millis(50))
     }

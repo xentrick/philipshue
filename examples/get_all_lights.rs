@@ -36,7 +36,7 @@ fn main() {
                          name_len = max_name_len);
             }
         }
-        Err(err) => panic!("{:?}", err),
+        Err(err) => println!("Error: {}", err),
     }
 }
 

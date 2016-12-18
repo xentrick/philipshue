@@ -28,7 +28,7 @@ fn main() {
                     thread::sleep(Duration::from_secs(5));
                 }
                 Err(e) => {
-                    println!("Unexpected error occured: {:?}", e);
+                    println!("Unexpected error occured: {}", e);
                     return;
                 }
             }

@@ -36,7 +36,7 @@ fn main() {
             }
             println!("{:#?}", groups);
         }
-        Err(err) => panic!("{:?}", err),
+        Err(err) => println!("Error: {}", err),
     }
 }
 
