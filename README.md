@@ -16,11 +16,15 @@ The goal of this library is to provide an easy way of interacting with the Hue A
 - Finding, manipulating and deleting lights from the bridge
 - Define, get and manipulate groups of lights from the bridge
 
-## Building
+## SSL problems, when building with UPnP feature
 
 When building, you might encounter problems with OpenSSL.
 You may have to manually tell Rust where OpenSSL is located through environment variables.
 Have a look at the [README of rust-openssl][rust-openssl] for more help.
+
+If you'd rather like to not use SSL, you can disable it by turning off
+default features and use UPnP for discovering instead. Although this currently
+requires using nightly Rust.
 
 ### On macOS
 
