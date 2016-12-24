@@ -31,7 +31,6 @@ unstable = ["serde_derive", "upnp"]
 serde_codegen = { version = "0.8", optional = true }
 
 [dependencies]
-regex = "0.1.17"
 serde = "0.8"
 serde_derive = { version = "0.8", optional = true }
 serde_json = "0.8"

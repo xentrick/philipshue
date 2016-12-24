@@ -6,20 +6,26 @@ pub struct LightState {
     /// Brightness of the light. This is a scale from the minimum capable brightness, 1, to the maximum, 254.
     pub bri: u8,
     /// Hue of the light. Both 0 and 65535 are red, 25500 is green and 46920 is blue.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hue: Option<u16>,
     /// Staturation of the light. 254 is the most saturated (colored) and 0 is the least (white).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sat: Option<u8>,
     /// The x and y coordinates of a colour in [CIE space](http://www.developers.meethue.com/documentation/core-concepts#color_gets_more_complicated)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub xy: Option<(f32, f32)>,
     /// The [mired](http://en.wikipedia.org/wiki/Mired) colour temperature of the light.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ct: Option<u16>,
     /// The [alert effect](http://www.developers.meethue.com/documentation/core-concepts#some_extra_fun_stuff)
     pub alert: String,
     /// The dynamic effect of the light. It can be either "none" or "colorloop"
     ///
     /// If "colorloop", the light will cycle hues
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub effect: Option<String>,
     /// The current colour mode either: "hs" for hue and saturation, "xy" for x and y coordinates in colour space, or "ct" for colour temperature
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub colormode: Option<String>,
     /// Whether the light can be reached by the bridge
     pub reachable: bool,
@@ -46,34 +52,48 @@ pub struct Light {
 /// View [the lights-api documention](http://www.developers.meethue.com/documentation/lights-api) for more information
 pub struct LightCommand {
     /// Whether to turn the light off or on
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub on: Option<bool>,
     /// Brightness of the colour of the light
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bri: Option<u8>,
     /// The hue of the colour of the light
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hue: Option<u16>,
     /// The saturation of the colour of the light
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sat: Option<u8>,
     /// The x and y coordinates of a colour in [CIE space](http://www.developers.meethue.com/documentation/core-concepts#color_gets_more_complicated)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub xy: Option<(f32, f32)>,
     /// The Mired Color temperature of the light. 2012 connected lights are capable of 153 (6500K) to 500 (2000K).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ct: Option<u16>,
     /// The [alert effect](http://www.developers.meethue.com/documentation/core-concepts#some_extra_fun_stuff)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub alert: Option<String>,
     /// The dynamic effect of the light. It can be either "none" or "colorloop"
     ///
     /// If "colorloop", the light will cycle hues
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub effect: Option<String>,
     /// Has to be a value between -254 and 254. Increments or decrements the value of the brightness.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bri_inc: Option<i16>,
     /// Has to be a value between -254 and 254. Increments or decrements the value of the saturation.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sat_inc: Option<i16>,
     /// Has to be a value between -65534 and 65534. Increments or decrements the value of the hue.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hue_inc: Option<i16>,
     /// Has to be a value between -65534 and 65534. Increments or decrements the value of the colour temperature.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ct_inc: Option<i16>,
     /// Increments or decrements the value of the xy.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub xy_inc: Option<(i16, i16)>,
     /// The scene identifier to be called (only for used groups)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub scene: Option<String>
 }
 
@@ -230,10 +250,13 @@ pub struct Group {
     pub group_type: GroupType,
     // Actually just a `LightState` without the `reachable` field
     /// The `LightCommand` applied to all lights in the group
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub action: Option<LightCommand>,
     /// State reprensentation of the group
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub state: Option<GroupState>,
     /// The class of the room, if the type of the group is `Room`
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub class: Option<RoomClass>
 }
 
@@ -241,10 +264,12 @@ pub struct Group {
 /// Attributes of a group to be changed using `set_group_attributes()`
 pub struct GroupCommand {
     /// The new name for the group.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// IDs of all the lights that should be in the group.
     pub lights: Vec<usize>,
     /// The class of the room. Default is `Other`.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub class: Option<RoomClass>
 }
 
@@ -256,10 +281,13 @@ pub struct GroupState {
     /// `true` only if all lamps are on.
     pub all_on: bool,
     /// The average brightness of the group.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bri: Option<u8>,
     /// Last time the state of at least one light in the group was changed.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lastupdated: Option<String>,
     /// Last time the group was turned on or off.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub lastswitched: Option<String>,
 }
 
@@ -387,37 +415,49 @@ pub struct SoftwareUpdateModifier {
     pub checkforupdate: bool
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Default)]
 /// Changes to be applied to the configuration.
 ///
 /// This is parsed to `bridge::modify_configuration()`
 pub struct ConfigurationModifier {
     /// Name of the bridge. This is also its uPnP name.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// Contains information about software updates
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub swupdate: Option<SoftwareUpdateModifier>,
     /// IP Address of the proxy server being used or "none".
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub proxyaddress: Option<String>,
     /// Port of the proxy being used or 0 if no proxy is being used
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub proxyport: Option<u16>,
     /// Whether the linkbuttion has been preseed within the last 30 seconds.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub linkbutton: Option<bool>,
     /// IP address of the bridge.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ipaddress: Option<String>,
     /// Network mask of the bridge.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub netmask: Option<String>,
     /// Gateway IP address of the bridge.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub gateway: Option<String>,
     /// Whether the IP address of the bridge is obtained via DHCP.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dhcp: Option<bool>,
     /// Current time stored on the bridge.
     ///
     /// **Only modifiable when bridge cannot access the internet.**
     #[serde(rename="UTC")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub utc: Option<String>,
     /// Timezone of the bridge.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub timezone: Option<String>,
     /// Perform a touchlink action if true.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub touchlink: Option<bool>
 }
 

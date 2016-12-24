@@ -12,7 +12,6 @@ extern crate ssdp;
 extern crate serde;
 extern crate serde_json;
 extern crate hyper;
-extern crate regex;
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
@@ -24,19 +23,6 @@ pub use bridge::discover;
 #[cfg(feature = "upnp")]
 pub use bridge::discover_upnp;
 pub use hue::LightCommand;
-
-mod clean {
-    use regex::Regex;
-    lazy_static!{
-        static ref REMOVE_NULL: Regex = Regex::new(r#""\w*":null,?"#).unwrap();
-        static ref TRAILING_COMMA: Regex = Regex::new(r",\}").unwrap();
-    }
-    /// Removes fields with `null` from the JSON-formatted `String`
-    pub fn clean_json(s: String) -> String {
-        let cleaned = REMOVE_NULL.replace_all(&s, "");
-        TRAILING_COMMA.replace_all(&cleaned, "}")
-    }
-}
 
 /// Errors that can occur in the crate
 pub mod errors;

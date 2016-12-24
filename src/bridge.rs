@@ -1,7 +1,7 @@
 use hyper::Client;
 use hyper::client::Body;
 
-use serde_json::{to_string, from_reader};
+use serde_json::{to_vec, from_reader};
 
 use errors::{Result, HueError};
 use ::hue::*;
@@ -96,8 +96,8 @@ pub struct Bridge {
     url: String,
 }
 
-fn send_with_body<'a, T: Deserialize>(rb: RequestBuilder<'a>, body: &'a str) -> Result<T> {
-    send(rb.body(Body::BufBody(body.as_bytes(), body.len())))
+fn send_with_body<'a, T: Deserialize>(rb: RequestBuilder<'a>, body: &'a [u8]) -> Result<T> {
+    send(rb.body(Body::BufBody(body, body.len())))
 }
 
 fn send<T: Deserialize>(rb: RequestBuilder) -> Result<T> {
@@ -119,7 +119,6 @@ pub type SuccessVec = Vec<Map<String, JsonValue>>;
 
 use serde::Deserialize;
 use hyper::client::RequestBuilder;
-use ::clean::clean_json;
 
 fn extract<T: Deserialize>(responses: Vec<HueResponse<T>>) -> Result<Vec<T>> {
     let mut res_v = Vec::with_capacity(responses.len());
@@ -168,7 +167,7 @@ impl Bridge {
     /// Sets the state of a light by sending a `LightCommand` to the bridge for this light
     pub fn set_light_state(&self, id: usize, command: &LightCommand) -> Result<SuccessVec> {
         send_with_body(self.client.put(&format!("{}lights/{}/state", self.url, id)),
-                       &clean_json(to_string(command)?))
+                       &to_vec(command)?)
             .and_then(extract)
     }
     /// Renames the light
@@ -176,7 +175,7 @@ impl Bridge {
         let mut name_map = Map::new();
         name_map.insert("name".to_owned(), name);
         send_with_body(self.client.put(&format!("{}lights/{}", self.url, id)),
-                       &clean_json(to_string(&name_map)?))
+                       &to_vec(&name_map)?)
             .and_then(extract)
     }
     /// Deletes a light from the bridge
@@ -201,7 +200,7 @@ impl Bridge {
             action: None,
         };
         let r: HueResponse<GroupId> = send_with_body(self.client.post(&format!("{}groups", self.url)),
-                                                     &clean_json(to_string(&g)?))?;
+                                                     &to_vec(&g)?)?;
         r.into_result().map(|g| g.id)
     }
     /// Gets extra information about a specific group
@@ -211,7 +210,7 @@ impl Bridge {
     /// Set the name, light and class of a group
     pub fn set_group_attributes(&self, id: usize, attr: &GroupCommand) -> Result<SuccessVec> {
         send_with_body(self.client.put(&format!("{}groups/{}", self.url, id)),
-                       &clean_json(to_string(attr)?))
+                       &to_vec(attr)?)
             .and_then(extract)
     }
     /// Sets the state of all lights in the group.
@@ -219,7 +218,7 @@ impl Bridge {
     /// ID 0 is a sepcial group containing all lights known to the bridge
     pub fn set_group_state(&self, id: usize, state: &LightCommand) -> Result<SuccessVec> {
         send_with_body(self.client.put(&format!("{}groups/{}/action", self.url, id)),
-                       &clean_json(to_string(state)?))
+                       &to_vec(state)?)
             .and_then(extract)
     }
     /// Deletes the specified group
@@ -238,7 +237,7 @@ impl Bridge {
     /// Sets some configuration values.
     pub fn modify_configuration(&self, command: &ConfigurationModifier) -> Result<SuccessVec> {
         send_with_body(self.client.put(&format!("{}config", self.url)),
-                       &clean_json(to_string(command)?))
+                       &to_vec(command)?)
             .and_then(extract)
     }
     /// Deletes the specified user removing them from the whitelist.
