@@ -324,7 +324,7 @@ pub struct DeviceTypes {
     /// Whether there is an update available for the bridge.
     bridge: bool,
     /// List of lights to be updated.
-    lights: Vec<Light>,
+    lights: Vec<usize>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
