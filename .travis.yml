@@ -2,7 +2,6 @@ language: rust
 sudo: false
 cache: cargo
 rust:
-- stable
 - beta
 - nightly
 matrix:
@@ -16,8 +15,6 @@ script:
   cargo update -v &&
   if [[ "$TRAVIS_RUST_VERSION" == nightly* ]]; then
     (cargo test -v --no-default-features --features "unstable nupnp")
-  elif [[ "$TRAVIS_RUST_VERSION" == beta* ]]; then
-    (cargo test -v --no-default-features --features beta)
   else
     (cargo test -v)
   fi

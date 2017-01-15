@@ -18,21 +18,16 @@ exclude = [
     ".travis.yml",
     "appveyor.yml"
 ]
-build = "build.rs"
 
 [features]
-default = ["serde_codegen", "nupnp"]
-beta = ["serde_derive", "nupnp"]
+default = ["nupnp"]
 upnp = ["ssdp"]
 nupnp = ["hyper/ssl"]
-unstable = ["serde_derive", "upnp"]
-
-[build-dependencies]
-serde_codegen = { version = "0.8", optional = true }
+unstable = ["upnp"]
 
 [dependencies]
 serde = "0.8"
-serde_derive = { version = "0.8", optional = true }
+serde_derive = "0.8"
 serde_json = "0.8"
 ssdp = { version = "0.5", optional = true }
 error-chain = "0.7"

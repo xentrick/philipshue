@@ -2,7 +2,6 @@
 
 //! Crate for communicating with the hue API
 
-#[cfg(feature = "serde_derive")]
 #[macro_use]
 extern crate serde_derive;
 #[cfg(feature = "ssdp")]
