@@ -1,6 +1,6 @@
 [package]
 name = "philipshue"
-version = "0.2.3"
+version = "0.2.4"
 authors = [
   "Mathieu Poumeyrol <kali@zoy.org>",
   "Bjarke Sørensen <bs@wasd.dk>",
