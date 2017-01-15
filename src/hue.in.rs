@@ -1,3 +1,5 @@
+use serde::de::{Deserialize, Deserializer};
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 /// The state of the light with similar structure to `LightCommand`
 pub struct LightState {
@@ -522,7 +524,8 @@ pub struct FullState {
 }
 
 /// A [scene](https://developers.meethue.com/documentation/scenes-api)
-// TODO Better explanation of scenes
+///
+/// A scene can be used to store a specific set of states of lights on the bridge to recall later.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Scene {
     /// Human readable name given to the scene
@@ -546,8 +549,6 @@ pub struct Scene {
     #[serde(default)]
     pub lightstates: Map<usize, LightStateChange>
 }
-
-use serde::de::{Deserialize, Deserializer};
 
 fn non_default<T, D>(de: &mut D) -> Result<Option<T>, D::Error>
 where T: Deserialize + PartialEq + Default, D: Deserializer {
