@@ -13,8 +13,8 @@ environment:
 install:
   - ps: Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-1_0_1u.exe"
   - Win%BITS%OpenSSL-1_0_1u.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
-  - ps: Start-FileDownload "https://static.rust-lang.org/dist/rust-1.13.0-${env:TARGET}.exe"
-  - rust-1.13.0-%TARGET%.exe /VERYSILENT /NORESTART /DIR="C:\Program Files (x86)\Rust"
+  - ps: Start-FileDownload "https://static.rust-lang.org/dist/rust-beta-${env:TARGET}.exe"
+  - rust-beta-%TARGET%.exe /VERYSILENT /NORESTART /DIR="C:\Program Files (x86)\Rust"
   - SET PATH=%PATH%;C:\Program Files (x86)\Rust\bin
   - SET PATH=%PATH%;C:\MinGW\bin
   - rustc -V
@@ -23,7 +23,7 @@ install:
 build: false
 
 test_script:
-  - cargo test --verbose
+  - cargo test -v --no-default-features --features beta
 
 notifications:
 - provider: Slack

@@ -22,6 +22,7 @@ build = "build.rs"
 
 [features]
 default = ["serde_codegen", "nupnp"]
+beta = ["serde_derive", "nupnp"]
 upnp = ["ssdp"]
 nupnp = ["hyper/ssl"]
 unstable = ["serde_derive", "upnp"]

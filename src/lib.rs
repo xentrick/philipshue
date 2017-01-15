@@ -1,5 +1,4 @@
 #![warn(missing_docs)]
-#![cfg_attr(feature = "serde_derive", feature(proc_macro))]
 
 //! Crate for communicating with the hue API
 
