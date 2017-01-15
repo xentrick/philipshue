@@ -266,6 +266,17 @@ impl Bridge {
         send(self.client.get(&self.url))
     }
 
+    /// Sets the state of lights in the group to the state in the scene
+    ///
+    /// Note that this will affect that are both in the group and in the scene.
+    /// Using group 0 will set all the lights in the scene, since group 0 is a special
+    /// group that contains all lights
+    pub fn recall_scene_in_group(&self, group_id: usize, scene_id: &str) -> Result<SuccessVec> {
+        send_with_body(self.client.put(&format!("{}groups/{}/action", self.url, group_id)),
+                       &to_vec(&SceneRecall{scene: scene_id})?)
+            .and_then(extract)
+    }
+
     // SCENES
 
     /// Gets all scenes of the bridge

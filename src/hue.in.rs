@@ -128,9 +128,6 @@ pub struct LightCommand {
     /// Increments or decrements the value of the xy.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub xy_inc: Option<(i16, i16)>,
-    /// The scene identifier to be called (only for used groups)
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub scene: Option<String>
 }
 
 impl LightCommand {

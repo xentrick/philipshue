@@ -37,6 +37,11 @@ impl<T: Deserialize> HueResponse<T> {
     }
 }
 
+#[derive(Debug, Clone, Serialize)]
+pub struct SceneRecall<'a> {
+    pub scene: &'a str
+}
+
 #[derive(Debug, Deserialize)]
 /// An error object returned from the API
 pub struct Error {
