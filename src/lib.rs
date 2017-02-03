@@ -2,7 +2,6 @@
 
 //! Crate for communicating with the hue API
 
-#[cfg(feature = "serde_derive")]
 #[macro_use]
 extern crate serde_derive;
 #[cfg(feature = "ssdp")]
@@ -11,6 +10,8 @@ extern crate ssdp;
 extern crate serde;
 extern crate serde_json;
 extern crate hyper;
+// #[cfg(feature = "nupnp")]
+// extern crate hyper_openssl;
 #[macro_use]
 extern crate error_chain;
 

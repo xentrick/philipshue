@@ -23,7 +23,7 @@ install:
 build: false
 
 test_script:
-  - cargo test -v --no-default-features --features beta
+  - cargo test -v
 
 notifications:
 - provider: Slack

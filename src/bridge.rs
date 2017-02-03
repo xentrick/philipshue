@@ -2,6 +2,7 @@ use hyper::Client;
 use hyper::client::Body;
 
 use std::io::Read;
+use std::collections::BTreeMap;
 
 use serde_json::{to_vec, from_reader};
 
@@ -12,6 +13,15 @@ use ::json::*;
 /// Attempts to discover bridges using `https://www.meethue.com/api/nupnp`
 #[cfg(feature = "nupnp")]
 pub fn discover() -> Result<Vec<Discovery>> {
+    /*
+    use hyper::net::HttpsConnector;
+    use hyper_openssl::OpensslClient;
+
+    let ssl = OpensslClient::new().unwrap();
+    let connector = HttpsConnector::new(ssl);
+    let client = Client::with_connector(connector);
+    */
+
     Client::new()
         .get("https://www.meethue.com/api/nupnp")
         .send()
@@ -129,7 +139,7 @@ fn get_ip_and_username() {
 
 /// Many commands on the bridge return an array of things that were succesful.
 /// This is a type alias for that type.
-pub type SuccessVec = Vec<Map<String, JsonValue>>;
+pub type SuccessVec = Vec<JsonMap<String, JsonValue>>;
 
 use serde::Deserialize;
 use hyper::client::RequestBuilder;
@@ -159,7 +169,7 @@ impl Bridge {
         self.url.split('/').nth(4).unwrap()
     }
     /// Gets all lights that are connected to the bridge
-    pub fn get_all_lights(&self) -> Result<Map<usize, Light>> {
+    pub fn get_all_lights(&self) -> Result<BTreeMap<usize, Light>> {
         send(self.client.get(&format!("{}lights", self.url)))
     }
     /// Gets the light with the specific id
@@ -167,7 +177,7 @@ impl Bridge {
         send(self.client.get(&format!("{}lights/{}", self.url, id)))
     }
     /// Gets all the light that were found last time a search for new lights was done
-    pub fn get_new_lights(&self) -> Result<Map<usize, Light>> {
+    pub fn get_new_lights(&self) -> Result<BTreeMap<usize, Light>> {
         // TODO return lastscan too
         send(self.client.get(&format!("{}lights/new", self.url)))
     }
@@ -186,7 +196,7 @@ impl Bridge {
     }
     /// Renames the light
     pub fn rename_light(&self, id: usize, name: String) -> Result<SuccessVec> {
-        let mut name_map = Map::new();
+        let mut name_map = BTreeMap::new();
         name_map.insert("name".to_owned(), name);
         send_with_body(self.client.put(&format!("{}lights/{}", self.url, id)),
                        &to_vec(&name_map)?)
@@ -200,7 +210,7 @@ impl Bridge {
     // GROUPS
 
     /// Gets all groups of the bridge
-    pub fn get_all_groups(&self) -> Result<Map<usize, Group>> {
+    pub fn get_all_groups(&self) -> Result<BTreeMap<usize, Group>> {
         send(self.client.get(&format!("{}groups", self.url)))
     }
     /// Creates a group and returns the ID of the group
@@ -280,7 +290,7 @@ impl Bridge {
     // SCENES
 
     /// Gets all scenes of the bridge
-    pub fn get_all_scenes(&self) -> Result<Map<String, Scene>> {
+    pub fn get_all_scenes(&self) -> Result<BTreeMap<String, Scene>> {
         send(self.client.get(&format!("{}scenes", self.url)))
     }
     /// Creates a scene on the bridge and returns the ID of the created scene.
