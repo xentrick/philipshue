@@ -349,7 +349,8 @@ impl Discovery {
     }
 }
 
-pub use serde_json::{Map, Value as JsonValue};
+pub use serde_json::{Map as JsonMap, Value as JsonValue};
+use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Deserialize)]
 /// Contains information about what can be updated
@@ -399,7 +400,7 @@ pub struct Configuration {
     /// Contains information about software updates
     pub swupdate: SoftwareUpdate,
     /// A list of all registered users
-    pub whitelist: Map<String, WhitelistUser>,
+    pub whitelist: BTreeMap<String, WhitelistUser>,
     /// Version of the hue API on the bridge.
     pub apiversion: String,
     /// Software version of the bridge
@@ -502,16 +503,16 @@ fn null_value() -> JsonValue{
 /// The entire datastore of the bridge.
 pub struct FullState {
     /// All lights on the bridge.
-    pub lights: Map<usize, Light>,
+    pub lights: BTreeMap<usize, Light>,
     /// All groups on the bridge.
-    pub groups: Map<usize, Group>,
+    pub groups: BTreeMap<usize, Group>,
     /// The configuration of the bridge.
     pub config: Configuration,
     /// Not yet fully implemented
     #[serde(default = "null_value")]
     pub schedule: JsonValue,
     /// All scenes on the bridge
-    pub scenes: Map<String, Scene>,
+    pub scenes: BTreeMap<String, Scene>,
     /// Not yet fully implemented
     #[serde(default = "null_value")]
     pub sensors: JsonValue,
@@ -544,10 +545,10 @@ pub struct Scene {
     pub lastupdated: Option<String>,
     /// Light states stored on the scene to be recalled
     #[serde(default)]
-    pub lightstates: Map<usize, LightStateChange>
+    pub lightstates: BTreeMap<usize, LightStateChange>
 }
 
-fn non_default<T, D>(de: &mut D) -> Result<Option<T>, D::Error>
+fn non_default<'a, T, D>(de: D) -> Result<Option<T>, D::Error>
 where T: Deserialize + PartialEq + Default, D: Deserializer {
     let ad = <Option<T>>::deserialize(de)?;
     if ad.as_ref().map(|x| *x == Default::default()).unwrap_or(true) {

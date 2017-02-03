@@ -26,13 +26,15 @@ nupnp = ["hyper/ssl"]
 unstable = ["upnp"]
 
 [dependencies]
-serde = "0.8"
-serde_derive = "0.8"
-serde_json = "0.8"
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"
 ssdp = { version = "0.5", optional = true }
-error-chain = "0.7"
+error-chain = "0.8"
+# hyper = "0.10.4"
+# hyper-openssl = { version = "0.2.2", optional = true }
 
+# TODO Update hyper
 [dependencies.hyper]
 version = "0.9.11"
 default-features = false
-features = ["serde-serialization"]
