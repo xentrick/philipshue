@@ -13,17 +13,14 @@ use ::json::*;
 /// Attempts to discover bridges using `https://www.meethue.com/api/nupnp`
 #[cfg(feature = "nupnp")]
 pub fn discover() -> Result<Vec<Discovery>> {
-    /*
     use hyper::net::HttpsConnector;
     use hyper_openssl::OpensslClient;
 
     let ssl = OpensslClient::new().unwrap();
     let connector = HttpsConnector::new(ssl);
     let client = Client::with_connector(connector);
-    */
 
-    Client::new()
-        .get("https://www.meethue.com/api/nupnp")
+    client.get("https://www.meethue.com/api/nupnp")
         .send()
         .map_err(HueError::from)
         .and_then(|ref mut r| from_reader(r).map_err(From::from))
