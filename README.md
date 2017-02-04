@@ -23,26 +23,14 @@ You may have to manually tell Rust where OpenSSL is located through environment 
 Have a look at the [README of rust-openssl][rust-openssl] for more help.
 
 If you'd rather like to not use SSL, you can disable it by turning off
-default features and use UPnP for discovering instead. Although this currently
-requires using nightly Rust.
+default features and use UPnP for discovering instead:
 
-### On macOS
-
-```bash
-export OPENSSL_INCLUDE_DIR=`brew --prefix openssl`/include
-export OPENSSL_LIB_DIR=`brew --prefix openssl`/lib
+```toml
+[dependencies.philipshue]
+version = "*"
+default-features = false
+features = ["unstable"]
 ```
+Although this currently requires using nightly Rust.
 
-### On Windows
-
-```batch
-set OPENSSL_INCLUDE_DIR=C:\OpenSSL\include
-set OPENSSL_LIB_DIR=C:\OpenSSL\lib
-set OPENSSL_LIBS=ssleay32:libeay32
-```
-
-Install OpenSSL-1_0_1u from <http://slproweb.com/products/Win32OpenSSL.html>.
-Make sure to install it in the same directory as written in the environment variables
-(in the case of this example: `C:\OpenSSL\`).
-
-[rust-openssl]: https://github.com/sfackler/rust-openssl/blob/master/README.md
+[rust-openssl]: https://github.com/sfackler/rust-openssl#building
