@@ -33,6 +33,7 @@ pub fn discover_upnp() -> ::std::result::Result<Vec<String>, ::ssdp::SSDPError> 
     use ssdp::header::{HeaderMut, Man, MX, ST};
     use ssdp::message::SearchRequest;
     use ssdp::FieldMap;
+    use ssdp::message::Multicast;
 
     let mut request = SearchRequest::new();
 
@@ -105,16 +106,21 @@ pub struct Bridge {
     url: String,
 }
 
-fn send_with_body<'a, T: Deserialize>(rb: RequestBuilder<'a>, body: &'a [u8]) -> Result<T> {
+fn send_with_body<'a, T>(rb: RequestBuilder<'a>, body: &'a [u8]) -> Result<T>
+    where for<'de> T: Deserialize<'de>
+{
     send(rb.body(Body::BufBody(body, body.len())))
 }
 
-fn send<T: Deserialize>(rb: RequestBuilder) -> Result<T> {
+fn send<T>(rb: RequestBuilder) -> Result<T>
+    where for<'de> T: Deserialize<'de>
+{
     rb.send()
         .map_err(HueError::from)
         .and_then(|ref mut resp| {
             let mut buf = Vec::new();
-            resp.read_to_end(&mut buf).map_err(::serde_json::Error::from)?;
+            resp.read_to_end(&mut buf)?;
+            
 
             match from_reader::<_, T>(&mut &*buf) {
                 Ok(t) => Ok(t),
@@ -141,7 +147,9 @@ pub type SuccessVec = Vec<JsonMap<String, JsonValue>>;
 use serde::Deserialize;
 use hyper::client::RequestBuilder;
 
-fn extract<T: Deserialize>(responses: Vec<HueResponse<T>>) -> Result<Vec<T>> {
+fn extract<'de, T>(responses: Vec<HueResponse<T>>) -> Result<Vec<T>>
+    where T: Deserialize<'de>
+{
     let mut res_v = Vec::with_capacity(responses.len());
     for val in responses {
         res_v.push(val.into_result()?)
