@@ -297,6 +297,7 @@ pub struct Group {
     /// State reprensentation of the group
     #[serde(skip_serializing_if = "Option::is_none")]
     pub state: Option<GroupState>,
+    /// Whether the bridge can just delete this group.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recycle: Option<bool>,
     /// The class of the room, if the type of the group is `Room`

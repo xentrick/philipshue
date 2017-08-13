@@ -118,7 +118,7 @@ fn send<T: DeserializeOwned>(rb: RequestBuilder) -> Result<T> {
             let mut buf = Vec::new();
             resp.read_to_end(&mut buf)?;
 
-            from_slice(&buf).or_else(|e| {
+            from_slice(&buf).or_else(|_| {
                 from_slice::<Vec<HueResponse<T>>>(&buf)?
                     .into_iter()
                     .next()
