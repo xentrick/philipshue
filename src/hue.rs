@@ -369,6 +369,7 @@ pub struct DeviceTypes {
     /// Whether there is an update available for the bridge.
     bridge: bool,
     /// List of lights to be updated.
+    #[serde(deserialize_with = "string_to_usize_vec")]
     lights: Vec<usize>,
 }
 
@@ -540,6 +541,7 @@ pub struct Scene {
     /// Human readable name given to the scene
     pub name: String,
     /// The IDs of the lights in the scene.
+    #[serde(deserialize_with = "string_to_usize_vec")]
     pub lights: Vec<usize>,
     /// The name of the user that created or last modified the scene
     pub owner: String,
