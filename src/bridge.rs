@@ -4,7 +4,8 @@ use hyper::client::Body;
 use std::io::Read;
 use std::collections::BTreeMap;
 
-use serde_json::{to_vec, from_reader};
+use serde::de::DeserializeOwned;
+use serde_json::{to_vec, from_slice, from_reader};
 
 use errors::{Result, HueError};
 use ::hue::*;
@@ -106,30 +107,24 @@ pub struct Bridge {
     url: String,
 }
 
-fn send_with_body<'a, T>(rb: RequestBuilder<'a>, body: &'a [u8]) -> Result<T>
-    where for<'de> T: Deserialize<'de>
-{
+fn send_with_body<'a, T: DeserializeOwned>(rb: RequestBuilder<'a>, body: &'a [u8]) -> Result<T> {
     send(rb.body(Body::BufBody(body, body.len())))
 }
 
-fn send<T>(rb: RequestBuilder) -> Result<T>
-    where for<'de> T: Deserialize<'de>
-{
+fn send<T: DeserializeOwned>(rb: RequestBuilder) -> Result<T> {
     rb.send()
         .map_err(HueError::from)
         .and_then(|ref mut resp| {
             let mut buf = Vec::new();
             resp.read_to_end(&mut buf)?;
-            
 
-            match from_reader::<_, T>(&mut &*buf) {
-                Ok(t) => Ok(t),
-                Err(_) => from_reader::<_, Vec<HueResponse<T>>>(&mut &*buf)?
+            from_slice(&buf).or_else(|e| {
+                from_slice::<Vec<HueResponse<T>>>(&buf)?
                     .into_iter()
                     .next()
                     .ok_or_else(|| "Malformed response".into())
                     .and_then(HueResponse::into_result)
-            }
+            })
         })
 }
 
@@ -147,9 +142,7 @@ pub type SuccessVec = Vec<JsonMap<String, JsonValue>>;
 use serde::Deserialize;
 use hyper::client::RequestBuilder;
 
-fn extract<'de, T>(responses: Vec<HueResponse<T>>) -> Result<Vec<T>>
-    where T: Deserialize<'de>
-{
+fn extract<'a, T: Deserialize<'a>>(responses: Vec<HueResponse<T>>) -> Result<Vec<T>> {
     let mut res_v = Vec::with_capacity(responses.len());
     for val in responses {
         res_v.push(val.into_result()?)
@@ -225,6 +218,7 @@ impl Bridge {
             lights: lights,
             group_type: group_type,
             class: room_class,
+            recycle: None,
             state: None,
             action: None,
         };
