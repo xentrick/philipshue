@@ -271,12 +271,21 @@ impl Display for RoomClass {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+fn string_to_usize_vec<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Vec<usize>, D::Error> {
+    <Vec<String>>::deserialize(deserializer).map(|v| v
+        .into_iter()
+        .map(|s| s.parse().unwrap())
+        .collect()
+    )
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
 /// A reprensentation of a Hue group of lights
 pub struct Group {
     /// Name of the group. (Default name is "Group").
     pub name: String,
     /// IDs of all the lights in this group
+    #[serde(deserialize_with = "string_to_usize_vec")]
     pub lights: Vec<usize>,
     #[serde(rename="type")]
     /// Type of the group
@@ -288,6 +297,8 @@ pub struct Group {
     /// State reprensentation of the group
     #[serde(skip_serializing_if = "Option::is_none")]
     pub state: Option<GroupState>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recycle: Option<bool>,
     /// The class of the room, if the type of the group is `Room`
     #[serde(skip_serializing_if = "Option::is_none")]
     pub class: Option<RoomClass>
