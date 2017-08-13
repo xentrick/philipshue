@@ -15,7 +15,7 @@ fn main() {
 
     match bridge.get_all_lights() {
         Ok(lights) => {
-            let max_name_len = std::cmp::max(4, lights.values().map(|l| l.name.len()).max().unwrap_or(4));
+            let max_name_len = lights.values().map(|l| l.name.len()).chain(Some(4)).max().unwrap();
             println!("id {0:1$} on  bri hue   sat temp  alert   effect    colormode reachable xy",
                      "name",
                      max_name_len);

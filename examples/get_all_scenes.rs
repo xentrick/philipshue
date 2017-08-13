@@ -16,12 +16,8 @@ fn main() {
 
     match bridge.get_all_scenes() {
         Ok(scenes) => {
-            let name_len = std::cmp::max(4,
-                scenes.values().map(|s| s.name.len()).max().unwrap_or(4)
-            );
-            let id_len = std::cmp::max(2,
-                scenes.keys().map(|id| id.len()).max().unwrap_or(2)
-            );
+            let name_len = scenes.values().map(|s| s.name.len()).chain(Some(4)).max().unwrap();
+            let id_len = scenes.keys().map(|id| id.len()).chain(Some(2)).max().unwrap();
             println!("{0:2$} {1:3$} recycle locked appdata_and_version lights",
                      "id",
                      "name",
