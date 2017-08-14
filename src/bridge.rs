@@ -131,8 +131,8 @@ fn send<T: DeserializeOwned>(rb: RequestBuilder) -> Result<T> {
 #[test]
 fn get_ip_and_username() {
     let b = Bridge::new("test", "hello");
-    assert_eq!(b.get_ip(), "test");
-    assert_eq!(b.get_username(), "hello");
+    assert_eq!(b.ip(), "test");
+    assert_eq!(b.username(), "hello");
 }
 
 /// Many commands on the bridge return an array of things that were succesful.
@@ -159,11 +159,11 @@ impl Bridge {
         }
     }
     /// Gets the IP of bridge
-    pub fn get_ip(&self) -> &str {
+    pub fn ip(&self) -> &str {
         self.url.split('/').nth(2).unwrap()
     }
     /// Gets the username this `Bridge` uses
-    pub fn get_username(&self) -> &str {
+    pub fn username(&self) -> &str {
         self.url.split('/').nth(4).unwrap()
     }
     /// Gets all lights that are connected to the bridge
