@@ -1,5 +1,6 @@
 environment:
   SSL_CERT_FILE: "C:\\OpenSSL\\cacert.pem"
+  OPENSSL_VERSION: 1_1_0f
   matrix:
     # 1.1.0, 64/32 bit
     - TARGET: i686-pc-windows-gnu
@@ -10,9 +11,11 @@ environment:
       OPENSSL_DIR: C:\OpenSSL
 install:
   # install OpenSSL
-  - ps: Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-1_1_0d.exe"
-  - Win%BITS%OpenSSL-1_1_0d.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
-  - ps: Start-FileDownload "https://curl.haxx.se/ca/cacert.pem" -FileName "C:\OpenSSL\cacert.pem"
+  - mkdir C:\OpenSSL
+  - ps: Start-FileDownload "http://slproweb.com/download/Win${env:BITS}OpenSSL-${env:OPENSSL_VERSION}.exe"
+  - Win%BITS%OpenSSL-%OPENSSL_VERSION%.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
+  - appveyor DownloadFile https://curl.haxx.se/ca/cacert.pem -FileName C:\OpenSSL\cacert.pem
+
   # Install Rust
   - curl -sSf -o rustup-init.exe https://win.rustup.rs/
   - rustup-init.exe -y --default-host %TARGET%
@@ -24,7 +27,7 @@ install:
 build: false
 
 test_script:
-  - cargo test -v
+  - cargo test -v --target %TARGET%
 
 cache:
   - target
