@@ -16,24 +16,22 @@ pub struct Id<T>
 use ::serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
 /// A response that either is an error or a success
-pub struct HueResponse<T> {
+pub enum HueResponse<T> {
     /// The result from the bridge if it didn't fail
-    pub success: Option<T>,
+    Success(T),
     /// The error that was returned from the bridge
-    pub error: Option<Error>
+    Error(Error)
 }
 
 use ::errors::HueError;
 
-impl<'de, T> HueResponse<T> where T: Deserialize<'de> {
+impl<T> HueResponse<T> {
     pub fn into_result(self) -> Result<T, HueError> {
-        if let Some(t) = self.success {
-            Ok(t)
-        } else if let Some(error) = self.error {
-            Err(error.into())
-        } else {
-            Err("Malformed repsonse".into())
+        match self {
+            HueResponse::Success(s) => Ok(s),
+            HueResponse::Error(e) => Err(e.into()),
         }
     }
 }
