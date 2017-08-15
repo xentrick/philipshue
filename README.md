@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/Orangenosecom/philipshue.svg?branch=master)](https://travis-ci.org/Orangenosecom/philipshue)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Orangenosecom/philipshue?branch=master&svg=true)](https://ci.appveyor.com/project/Orangenosecom/philipshue)
 [![Crates.io](https://img.shields.io/crates/v/philipshue.svg?style=flat-square)](https://crates.io/crates/philipshue)
-![Licence](https://img.shields.io/crates/l/philipshue.svg?style=flat-square)
+[![Licence](https://img.shields.io/github/license/Orangenosecom/philipshue.svg?style=flat-square)](https://github.com/Orangenosecom/philipshue/blob/master/LICENCE)
 [![Docs.rs](https://docs.rs/philipshue/badge.svg)](https://docs.rs/philipshue)
 
 Library for interacting with the Hue API in order to control Hue lights.
