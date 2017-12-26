@@ -28,4 +28,6 @@ pub mod errors;
 pub mod bridge;
 /// Structs mapping the different JSON-objects used with Hue API
 pub mod hue;
+/// Success types
+pub mod success;
 mod json;
