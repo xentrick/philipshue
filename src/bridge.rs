@@ -166,6 +166,14 @@ fn extract_suc(respones: Vec<HueResponse<JsonMap<String, JsonValue>>>) -> Result
     sv.map(|sv| sv.into_iter().map(|s| s.into()).collect())
 }
 
+fn extract_succ<T: From<Success>>(respones: Vec<HueResponse<JsonMap<String, JsonValue>>>) -> Result<Vec<T>> {
+    let sv: SuccessVec = extract(respones)?;
+    let mut v = Vec::with_capacity(sv.len());
+
+    v.extend(sv.into_iter().map(|s| Success::from(s).into()));
+    Ok(v)
+}
+
 impl Bridge {
     /// Creates a `Bridge` on the given IP with the given username
     pub fn new<S: Into<String>, U: Into<String>>(ip: S, username: U) -> Self {
@@ -206,20 +214,25 @@ impl Bridge {
     pub fn set_light_state(&self, id: usize, command: &LightCommand) -> Result<Vec<::success::Light>> {
         send_with_body(self.client.put(&format!("{}lights/{}/state", self.url, id)),
                        &to_vec(command)?)
-            .and_then(extract_suc)
-            .map(::success::convert)
+            .and_then(extract_succ)
     }
     /// Renames the light
-    pub fn rename_light(&self, id: usize, name: String) -> Result<Vec<Success>> {
+    pub fn rename_light(&self, id: usize, name: String) -> Result<Vec<::success::Rename>> {
         let mut name_map = BTreeMap::new();
         name_map.insert("name".to_owned(), name);
         send_with_body(self.client.put(&format!("{}lights/{}", self.url, id)),
                        &to_vec(&name_map)?)
-            .and_then(extract_suc)
+            .and_then(extract_succ)
     }
     /// Deletes a light from the bridge
-    pub fn delete_light(&self, id: usize) -> Result<Vec<Success>> {
-        send(self.client.delete(&format!("{}lights/{}", self.url, id))).and_then(extract_suc)
+    pub fn delete_light(&self, id: usize) -> Result<Vec<::success::Delete>> {
+        send(self.client.delete(&format!("{}lights/{}", self.url, id)))
+            .and_then(extract::<String>)
+            .map(|v| {
+                let mut nv = Vec::with_capacity(v.len());
+                nv.extend(v.into_iter().map(|s| s.into()));
+                nv
+            })
     }
 
     // GROUPS
@@ -248,10 +261,10 @@ impl Bridge {
         send(self.client.get(&format!("{}groups/{}", self.url, id)))
     }
     /// Set the name, light and class of a group
-    pub fn set_group_attributes(&self, id: usize, attr: &GroupCommand) -> Result<Vec<Success>> {
+    pub fn set_group_attributes(&self, id: usize, attr: &GroupCommand) -> Result<Vec<::success::Group>> {
         send_with_body(self.client.put(&format!("{}groups/{}", self.url, id)),
                        &to_vec(attr)?)
-            .and_then(extract_suc)
+            .and_then(extract_succ)
     }
     /// Sets the state of all lights in the group.
     ///
@@ -263,9 +276,15 @@ impl Bridge {
     }
     /// Deletes the specified group
     ///
-    /// It's not allowed to delete groups of type `LightSource` or `Luminaire`.
-    pub fn delete_group(&self, id: usize) -> Result<Vec<String>> {
-        send(self.client.delete(&format!("{}groups/{}", self.url, id))).and_then(extract)
+    /// It is not allowed to delete groups of type `LightSource` or `Luminaire`.
+    pub fn delete_group(&self, id: usize) -> Result<Vec<::success::Delete>> {
+        send(self.client.delete(&format!("{}groups/{}", self.url, id)))
+            .and_then(extract::<String>)
+            .map(|v| {
+                let mut nv = Vec::with_capacity(v.len());
+                nv.extend(v.into_iter().map(|s| s.into()));
+                nv
+            })
     }
 
     // CONFIGURATION
