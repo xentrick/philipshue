@@ -1,4 +1,4 @@
-extern crate philipshue;
+ixtern crate philipshue;
 
 mod discover;
 use discover::discover;

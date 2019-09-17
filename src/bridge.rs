@@ -1,5 +1,6 @@
 use hyper::Client;
-use hyper::client::Body;
+use hyper::client::HttpConnector;
+use hyper::Body;
 
 use std::io::Read;
 use std::collections::BTreeMap;
@@ -14,12 +15,12 @@ use ::json::*;
 /// Attempts to discover bridges using `https://www.meethue.com/api/nupnp`
 #[cfg(feature = "nupnp")]
 pub fn discover() -> Result<Vec<Discovery>> {
-    use hyper::net::HttpsConnector;
-    use hyper_openssl::OpensslClient;
+    // use hyper::net::HttpsConnector;
+    use hyper_openssl::HttpsConnector;
 
-    let ssl = OpensslClient::new().unwrap();
-    let connector = HttpsConnector::new(ssl);
-    let client = Client::with_connector(connector);
+    // let ssl = OpensslClient::new().unwrap();
+    let client = HttpsConnector::new();
+    //let client = Client::with_connector(connector);
 
     client.get("https://www.meethue.com/api/nupnp")
         .send()
@@ -103,15 +104,15 @@ pub fn register_user(ip: &str, devicetype: &str) -> Result<String> {
 #[derive(Debug)]
 /// The bridge connection
 pub struct Bridge {
-    client: Client,
+    client: (Client<HttpConnector>),
     url: String,
 }
 
-fn send_with_body<'a, T: DeserializeOwned>(rb: RequestBuilder<'a>, body: &'a [u8]) -> Result<T> {
+fn send_with_body<'a, T: DeserializeOwned>(rb: Builder, body: &'a [u8]) -> Result<T> {
     send(rb.body(Body::BufBody(body, body.len())))
 }
 
-fn send<T: DeserializeOwned>(rb: RequestBuilder) -> Result<T> {
+fn send<T: DeserializeOwned>(rb: Builder) -> Result<T> {
     rb.send()
         .map_err(HueError::from)
         .and_then(|ref mut resp| {
@@ -140,7 +141,7 @@ fn get_ip_and_username() {
 pub type SuccessVec = Vec<JsonMap<String, JsonValue>>;
 
 use serde::Deserialize;
-use hyper::client::RequestBuilder;
+use hyper::client::Builder;
 
 fn extract<'a, T: Deserialize<'a>>(responses: Vec<HueResponse<T>>) -> Result<Vec<T>> {
     let mut res_v = Vec::with_capacity(responses.len());
