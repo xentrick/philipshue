@@ -1,26 +1,19 @@
-#![warn(missing_docs)]
-
-//! Crate for communicating with the hue API
-
 #[macro_use]
 extern crate serde_derive;
 #[cfg(feature = "ssdp")]
 extern crate ssdp;
 
-extern crate serde;
-extern crate serde_json;
-extern crate hyper;
 #[cfg(feature = "nupnp")]
-extern crate hyper_openssl;
+extern crate hyper_tls;
 #[macro_use]
 extern crate error_chain;
 
-pub use bridge::Bridge;
+pub use crate::bridge::Bridge;
 #[cfg(feature = "nupnp")]
-pub use bridge::discover;
+pub use crate::bridge::discover;
 #[cfg(feature = "upnp")]
-pub use bridge::discover_upnp;
-pub use hue::LightCommand;
+pub use crate::bridge::discover_upnp;
+pub use crate::hue::LightCommand;
 
 /// Errors that can occur in the crate
 pub mod errors;

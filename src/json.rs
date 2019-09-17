@@ -1,3 +1,6 @@
+use crate::errors::HueError;
+
+
 #[derive(Debug, Deserialize)]
 /// A user object returned from the API
 pub struct User{
@@ -22,8 +25,6 @@ pub enum HueResponse<T> {
     /// The error that was returned from the bridge
     Error(Error)
 }
-
-use ::errors::HueError;
 
 impl<T> HueResponse<T> {
     pub fn into_result(self) -> Result<T, HueError> {

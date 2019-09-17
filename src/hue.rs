@@ -1,5 +1,6 @@
 use serde::de::{Deserialize, Deserializer};
 
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 /// The state of the light with similar structure to `LightCommand`
 pub struct LightState {

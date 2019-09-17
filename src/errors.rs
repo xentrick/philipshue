@@ -3,8 +3,8 @@ use std::convert::From;
 use serde_json;
 use std::io;
 
-impl From<::json::Error> for HueError {
-    fn from(e: ::json::Error) -> HueError {
+impl From<crate::json::Error> for HueError {
+    fn from(e: crate::json::Error) -> HueError {
         HueErrorKind::BridgeError {
                 address: e.address,
                 description: e.description,
@@ -21,7 +21,6 @@ error_chain! {
 
     errors {
         /// An error that occured in the bridge
-        #[allow(missing_docs)]
         BridgeError {
             address: String,
             description: String,
@@ -66,7 +65,6 @@ macro_rules! error_enum {
 error_enum!{
     /// All errors defined in http://www.developers.meethue.com/documentation/error-messages
     #[repr(u16)]
-    #[allow(missing_docs)]
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub enum BridgeError {
         // Generic Errors

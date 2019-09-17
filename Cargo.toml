@@ -1,15 +1,10 @@
 [package]
 name = "philipshue"
 version = "0.3.2"
-authors = [
-  "Mathieu Poumeyrol <kali@zoy.org>",
-  "Bjarke Sørensen <bs@wasd.dk>",
-  "Lucas Falch Sørensen <lucas@wasd.dk>"
-]
+authors = ["this library will look nothing like the old"]
 description = "Rust library for Philips Hue lights"
 documentation = "http://docs.rs/philipshue/"
-homepage = "http://www.orangenose.com/products/philipshue/"
-repository = "http://github.com/Orangenosecom/philipshue"
+repository = "http://github.com/xentrick/philipshue"
 readme = "README.md"
 license = "MIT"
 keywords = [ "Philips", "hue", "light", "bulb" ]
@@ -18,19 +13,19 @@ exclude = [
     ".travis.yml",
     "appveyor.yml"
 ]
+edition = "2018"
 
 [features]
 default = ["nupnp"]
 upnp = ["ssdp"]
-nupnp = ["hyper-openssl"]
+nupnp = ["hyper-tls"]
 unstable = ["upnp"]
 
 [dependencies]
-openssl = "^0.10.0"
 serde = "1.0.101"
 serde_derive = "1.0.101"
 serde_json = "1.0.40"
 ssdp = { version = "0.6", optional = true }
 error-chain = "0.11"
-hyper = "^0.12.35"
-hyper-openssl = { version = "^0.7.1", optional = true }
+hyper = "0.12.35"
+hyper-tls = { version = "0.3.2", optional = true }
